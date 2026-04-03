@@ -5,281 +5,356 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ОВЕРЛАУД | OVERLOUD</title>
     <style>
-        /* БАЗА: Модный брутализм и тьма */
+        /* --- БАЗА И ПЕРЕМЕННЫЕ --- */
         :root {
             --bg-color: #030303;
             --text-color: #e0e0e0;
-            --flesh-red: #660000;
+            --flesh-red: #8b0000;
             --accent: #ff0000;
         }
 
         body, html {
-            margin: 0;
-            padding: 0;
-            width: 100%;
-            height: 100%;
-            background-color: var(--bg-color);
-            color: var(--text-color);
+            margin: 0; padding: 0; width: 100%; height: 100%;
+            background-color: var(--bg-color); color: var(--text-color);
             font-family: 'Helvetica Neue', Arial, sans-serif;
-            overflow: hidden; /* Запираем пользователя внутри */
-            cursor: crosshair; /* Резкий, неприятный курсор */
+            overflow-x: hidden; cursor: crosshair;
         }
 
-        /* ПОМЕХИ И СТАТИКА (Шум на фоне) */
-        .noise {
-            position: fixed;
-            top: 0; left: 0; width: 100vw; height: 100vh;
-            pointer-events: none;
-            z-index: 50;
-            opacity: 0.08;
-            background: url('data:image/svg+xml,%3Csvg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"%3E%3Cfilter id="noiseFilter"%3E%3CfeTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" stitchTiles="stitch"/%3E%3C/filter%3E%3Crect width="100%25" height="100%25" filter="url(%23noiseFilter)"/%3E%3C/svg%3E');
-            animation: noiseMove 0.2s infinite linear;
+        /* --- ЭКРАН ИНИЦИАЦИИ --- */
+        #init-screen {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: #000; z-index: 1000; display: flex;
+            justify-content: center; align-items: center; cursor: pointer;
+        }
+        .init-text {
+            font-size: 1rem; letter-spacing: 0.5rem; color: #555;
+            animation: pulseText 2s infinite; text-transform: uppercase;
+        }
+        @keyframes pulseText { 0%, 100% { opacity: 0.3; } 50% { opacity: 1; } }
+
+        /* --- КАМЕРА (Смотрящие за тобой) --- */
+        #camera-feed {
+            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            min-width: 100vw; min-height: 100vh; z-index: 1; opacity: 0.08;
+            pointer-events: none; object-fit: cover;
+            filter: grayscale(100%) sepia(100%) hue-rotate(300deg) contrast(300%) url(#flesh-distort);
         }
 
-        @keyframes noiseMove {
-            0% { transform: translate(0, 0); }
-            10% { transform: translate(-5%, -5%); }
-            20% { transform: translate(-10%, 5%); }
-            30% { transform: translate(5%, -10%); }
-            40% { transform: translate(-5%, 15%); }
-            50% { transform: translate(-10%, 5%); }
-            60% { transform: translate(15%, 0); }
-            70% { transform: translate(0, 10%); }
-            80% { transform: translate(-15%, 0); }
-            90% { transform: translate(10%, 5%); }
-            100% { transform: translate(5%, 0); }
+        /* --- КУРСОР "КРОВОТОЧАЩИЙ СЛЕД" --- */
+        .trail-drop {
+            position: fixed; color: var(--flesh-red); font-size: 10px;
+            pointer-events: none; z-index: 999;
+            animation: fadeDrop 1.5s forwards; mix-blend-mode: screen;
+        }
+        @keyframes fadeDrop { 0% { opacity: 1; transform: scale(1); } 100% { opacity: 0; transform: scale(3) translateY(20px); } }
+
+        /* --- ОСНОВНЫЕ БЛОКИ --- */
+        .section {
+            min-height: 100vh; display: flex; flex-direction: column;
+            align-items: center; justify-content: center; position: relative; z-index: 10;
+            padding: 2rem; box-sizing: border-box;
         }
 
-        /* КОНТЕЙНЕР (Центр культа) */
-        .container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            position: relative;
-            z-index: 10;
-        }
-
-        /* ЛОГОТИП ОМ (Амальгама и Плоть) */
-        .om-logo {
-            font-size: 15rem;
-            color: var(--bg-color);
-            text-shadow: 0 0 2px #fff, 0 0 10px var(--text-color), 0 0 20px var(--flesh-red);
-            /* Применяем SVG фильтр для эффекта живой, неприятной плоти */
-            filter: url(#flesh-distort);
-            animation: breathe 4s infinite alternate ease-in-out;
-            user-select: none;
-            line-height: 1;
-            margin-bottom: -20px;
-        }
-
-        /* Дыхание неживого */
-        @keyframes breathe {
-            0% { transform: scale(0.95) skewX(-2deg); opacity: 0.8; }
-            100% { transform: scale(1.05) skewX(2deg); opacity: 1; text-shadow: 0 0 5px #fff, 0 0 30px var(--flesh-red), 0 0 50px #ff0000; }
-        }
-
-        /* НАЗВАНИЕ БРЕНДА (Модный акцент) */
-        .brand {
-            font-size: 3rem;
-            font-weight: 900;
-            letter-spacing: 0.5rem;
-            text-transform: uppercase;
-            margin: 0;
-            z-index: 10;
+        #dynamic-bg {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-size: cover; background-position: center;
+            opacity: 0; transition: opacity 0.1s; z-index: 5; pointer-events: none;
             mix-blend-mode: exclusion;
         }
 
-        /* ТЕКСТ (Нарушение связей) */
-        .manifesto {
-            margin-top: 2rem;
-            font-size: 0.9rem;
-            letter-spacing: 0.2rem;
-            color: #888;
-            text-align: center;
-            max-width: 600px;
-            text-transform: uppercase;
-            font-weight: bold;
-        }
+        /* --- ЦЕНТРАЛЬНЫЙ БЛОК --- */
+        .om-logo { font-size: 10rem; color: var(--bg-color); text-shadow: 0 0 20px var(--flesh-red); filter: url(#flesh-distort); animation: breathe 4s infinite alternate; user-select: none; }
+        @keyframes breathe { 0% { transform: scale(0.95); opacity: 0.8; } 100% { transform: scale(1.05); text-shadow: 0 0 50px #ff0000; } }
+        .brand { font-size: 4rem; font-weight: 900; letter-spacing: 0.5rem; margin: 0; mix-blend-mode: exclusion; }
+        .manifesto { margin-top: 2rem; letter-spacing: 0.2rem; color: #888; text-align: center; max-width: 600px; }
 
-        /* СМОТРЯЩИЕ ЗА ТОБОЙ (Глаза во тьме) */
-        .watcher {
-            position: absolute;
-            width: 10px; height: 10px;
-            background: radial-gradient(circle, #fff 10%, var(--flesh-red) 50%, transparent 80%);
-            border-radius: 50%;
-            opacity: 0;
-            transition: opacity 2s, transform 0.1s;
-            pointer-events: none;
-            filter: blur(2px);
-            z-index: 1;
+        /* --- РОСТЕР (СИМБИОНТЫ) --- */
+        .roster-title { font-size: 1rem; letter-spacing: 1rem; color: var(--flesh-red); margin-bottom: 3rem; }
+        .roster-list { list-style: none; padding: 0; text-align: center; width: 100%; }
+        .roster-item {
+            font-size: 4rem; font-weight: 900; text-transform: uppercase;
+            color: transparent; -webkit-text-stroke: 1px #444; margin: -10px 0;
+            cursor: crosshair; transition: 0.1s; position: relative; z-index: 20;
         }
+        .roster-item:hover { color: #fff; -webkit-text-stroke: 0px; transform: scale(1.05) skewX(-5deg); text-shadow: 5px 0px 0px var(--flesh-red); }
 
-        /* КНОПКА (Тусовка в квартире) */
-        .invite-btn {
-            margin-top: 4rem;
-            padding: 15px 40px;
-            background: transparent;
-            color: var(--text-color);
-            border: 1px solid var(--text-color);
-            font-size: 0.8rem;
-            letter-spacing: 0.3rem;
-            text-transform: uppercase;
-            cursor: pointer;
-            transition: all 0.2s;
-            position: relative;
-            overflow: hidden;
-            z-index: 20;
+        /* --- МЕРЧ (МАТЕРИАЛИЗАЦИЯ) --- */
+        .merch-grid { display: flex; gap: 4rem; justify-content: center; flex-wrap: wrap; margin-top: 2rem; }
+        .merch-item { text-align: center; position: relative; }
+        .merch-img-placeholder { width: 250px; height: 350px; border: 1px solid #333; display: flex; align-items: center; justify-content: center; color: #333; margin-bottom: 1rem; filter: grayscale(100%); transition: 0.3s;}
+        .merch-item:hover .merch-img-placeholder { filter: grayscale(0%) invert(1); }
+        .sold-out { text-decoration: line-through; text-decoration-color: var(--accent); text-decoration-thickness: 3px; color: #555;}
+        
+        .btn {
+            margin-top: 2rem; padding: 15px 40px; background: transparent; color: var(--text-color);
+            border: 1px solid var(--text-color); font-size: 0.8rem; letter-spacing: 0.3rem; text-transform: uppercase;
+            cursor: pointer; transition: all 0.2s; z-index: 20;
         }
+        .btn:hover { background: var(--text-color); color: var(--bg-color); }
 
-        .invite-btn:hover {
-            background: var(--text-color);
-            color: var(--bg-color);
-            box-shadow: 0 0 20px var(--text-color);
-            /* Резкий сдвиг при наведении */
-            transform: translate(-2px, -2px); 
+        /* --- ТЕРМИНАЛ (ARG) --- */
+        #terminal {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(0,0,0,0.95); z-index: 2000; display: none;
+            flex-direction: column; justify-content: center; align-items: center;
+            font-family: monospace; color: var(--accent);
         }
-
-        /* Виньетка для клаустрофобии */
-        .vignette {
-            position: fixed;
-            top: 0; left: 0; width: 100vw; height: 100vh;
-            background: radial-gradient(circle at center, transparent 30%, #000 90%);
-            pointer-events: none;
-            z-index: 40;
+        #term-input {
+            background: transparent; border: none; border-bottom: 1px solid var(--accent);
+            color: #fff; font-size: 2rem; text-align: center; outline: none; text-transform: uppercase;
+            font-family: monospace; width: 300px; letter-spacing: 0.5rem; margin-top: 2rem;
         }
     </style>
 </head>
 <body>
 
-    <!-- SVG Фильтр для эффекта "живой плоти / амальгамы" -->
+    <!-- Эмбиент из пустоты (Ender World vibe) -->
+    <audio id="ender-audio" src="assets/ender_ambient.mp3" loop preload="auto"></audio>
+
     <svg style="display: none;">
         <defs>
             <filter id="flesh-distort">
-                <!-- Генерируем "мясную" текстуру -->
                 <feTurbulence type="fractalNoise" baseFrequency="0.01 0.15" numOctaves="3" result="warp" id="noise-anim"/>
-                <!-- Искажаем ОМ с помощью текстуры -->
                 <feDisplacementMap in="SourceGraphic" in2="warp" scale="30" xChannelSelector="R" yChannelSelector="G"/>
             </filter>
         </defs>
     </svg>
 
-    <div class="noise"></div>
-    <div class="vignette"></div>
+    <div id="init-screen" onclick="initExperience()">
+        <div class="init-text">Разрешить симбиоз (Клик)</div>
+    </div>
 
-    <!-- Смотрящие (создаются через JS) -->
-    <div id="watchers-container"></div>
+    <video id="camera-feed" autoplay playsinline muted></video>
+    <div id="dynamic-bg"></div>
 
-    <div class="container">
+    <!-- СЕКЦИЯ 1: ЦЕНТР КУЛЬТА -->
+    <div class="section">
         <div class="om-logo">ॐ</div>
         <h1 class="brand">ОВЕРЛАУД</h1>
-        
-        <!-- Текст, который будет искажаться (Нарушение причинно-следственных связей) -->
         <div class="manifesto" id="scramble-text">
             ПЛОТЬ ДЫШИТ. ПРИЧИНЫ НЕТ. СЛЕДСТВИЯ НЕТ. МЫ СМОТРИМ.
         </div>
+        <button class="btn" onclick="openTerminal()">Вход в квартиру</button>
+    </div>
 
-        <!-- Отсылка к Boiler Room в квартире -->
-        <button class="invite-btn" onclick="requestInvite()">Вход в квартиру</button>
+    <!-- СЕКЦИЯ 2: РОСТЕР -->
+    <div class="section">
+        <div class="roster-title">СИМБИОНТЫ</div>
+        <ul class="roster-list">
+            <li class="roster-item" data-bg="assets/artist1.gif" data-audio="assets/noise_burst.mp3">ТВОЙ НИКНЕЙМ</li>
+            <li class="roster-item" data-bg="assets/artist2.gif" data-audio="assets/noise_burst.mp3">АРТИСТ 2</li>
+            <li class="roster-item" data-bg="" data-audio="">АРТИСТ 3</li>
+        </ul>
+    </div>
+
+    <!-- СЕКЦИЯ 3: МЕРЧ (Триггер для Ender Ambient) -->
+    <div class="section" id="merch-section">
+        <div class="roster-title">МАТЕРИАЛИЗАЦИЯ</div>
+        <div class="merch-grid">
+            <div class="merch-item">
+                <div class="merch-img-placeholder">[ИЗОБРАЖЕНИЕ ОБЪЕКТА]</div>
+                <div class="sold-out">КАССЕТА ОВЕРЛАУД REVIVAL</div>
+                <div style="color: var(--flesh-red); margin-top: 10px;">ИЗЪЯТО (SOLD OUT)</div>
+            </div>
+            <div class="merch-item">
+                <div class="merch-img-placeholder">[ИЗОБРАЖЕНИЕ ОБЪЕКТА]</div>
+                <div>ФУТБОЛКА "СИМБИОЗ"</div>
+                <button class="btn" style="margin-top: 15px; padding: 10px 20px;">МАТЕРИАЛИЗОВАТЬ</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ТЕРМИНАЛ ЗАГАДКА -->
+    <div id="terminal">
+        <div>ТРЕБУЕТСЯ КЛЮЧ ДОСТУПА. СЛУШАЙ ВНИМАТЕЛЬНО.</div>
+        <input type="text" id="term-input" autocomplete="off" spellcheck="false">
+        <div id="term-error" style="color: var(--accent); margin-top: 20px; opacity: 0;">ОШИБКА. ПЛОТЬ ОТТОРГНУТА.</div>
+        <button class="btn" onclick="closeTerminal()" style="margin-top: 50px; font-size: 0.6rem; border: none;">[Х] ПРЕРВАТЬ</button>
     </div>
 
     <script>
-        // 1. АНИМАЦИЯ ПЛОТИ (Изменение SVG фильтра во времени)
-        const filterNoise = document.getElementById('noise-anim');
-        let phase = 0;
-        function animateFlesh() {
-            phase += 0.05;
-            // Делаем так, чтобы искажение "текло"
-            filterNoise.setAttribute('baseFrequency', `0.01 ${0.1 + Math.sin(phase) * 0.05}`);
-            requestAnimationFrame(animateFlesh);
-        }
-        animateFlesh();
+        let audioCtx, osc, gainNode, distortionNode;
+        const enderAudio = document.getElementById('ender-audio');
+        let isInitiated = false;
 
-        // 2. СМОТРЯЩИЕ ЗА ТОБОЙ (Глаза реагируют на курсор)
-        const watchersContainer = document.getElementById('watchers-container');
-        const numWatchers = 6; // Количество глаз во тьме
-        const watchers = [];
+        // --- УПРАВЛЕНИЕ ГРОМКОСТЬЮ (ПЛАВНЫЕ ФЕЙДЫ) ---
+        let enderFadeInterval;
+        function fadeEnderAudio(targetVolume, duration) {
+            clearInterval(enderFadeInterval);
+            let step = 0.05;
+            let intervalTime = duration / (Math.abs(targetVolume - enderAudio.volume) / step);
+            
+            if(targetVolume > 0 && enderAudio.paused) enderAudio.play();
 
-        for (let i = 0; i < numWatchers; i++) {
-            let w = document.createElement('div');
-            w.classList.add('watcher');
-            // Раскидываем случайно по экрану
-            w.style.left = Math.random() * 100 + 'vw';
-            w.style.top = Math.random() * 100 + 'vh';
-            watchersContainer.appendChild(w);
-            watchers.push(w);
-        }
-
-        document.addEventListener('mousemove', (e) => {
-            const mouseX = e.clientX;
-            const mouseY = e.clientY;
-
-            watchers.forEach(w => {
-                const rect = w.getBoundingClientRect();
-                const watcherX = rect.left + rect.width / 2;
-                const watcherY = rect.top + rect.height / 2;
-                
-                // Вычисляем угол к курсору
-                const angle = Math.atan2(mouseY - watcherY, mouseX - watcherX);
-                const distance = Math.hypot(mouseX - watcherX, mouseY - watcherY);
-
-                // Если курсор близко, "глаза" открываются (opacity) и следят
-                if (distance < 400) {
-                    w.style.opacity = (400 - distance) / 400;
-                    const moveX = Math.cos(angle) * 15;
-                    const moveY = Math.sin(angle) * 15;
-                    w.style.transform = `translate(${moveX}px, ${moveY}px)`;
-                } else {
-                    w.style.opacity = 0;
+            enderFadeInterval = setInterval(() => {
+                if (enderAudio.volume < targetVolume) {
+                    enderAudio.volume = Math.min(enderAudio.volume + step, targetVolume);
+                } else if (enderAudio.volume > targetVolume) {
+                    enderAudio.volume = Math.max(enderAudio.volume - step, targetVolume);
                 }
-            });
+                
+                if (enderAudio.volume === targetVolume) {
+                    clearInterval(enderFadeInterval);
+                    if (targetVolume === 0) enderAudio.pause();
+                }
+            }, intervalTime);
+        }
+
+        // 1. ИНИЦИАЛИЗАЦИЯ
+        async function initExperience() {
+            document.getElementById('init-screen').style.display = 'none';
+            isInitiated = true;
+            enderAudio.volume = 0; // Начинаем с тишины для пустоты
+            
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                document.getElementById('camera-feed').srcObject = stream;
+            } catch (err) { console.log("Камера отклонена."); }
+
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            osc = audioCtx.createOscillator();
+            gainNode = audioCtx.createGain();
+            distortionNode = audioCtx.createWaveShaper();
+
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(55, audioCtx.currentTime); // 55Hz гул
+            
+            distortionNode.curve = makeDistortionCurve(0);
+            distortionNode.oversample = '4x';
+            gainNode.gain.setValueAtTime(0.05, audioCtx.currentTime); 
+
+            osc.connect(distortionNode);
+            distortionNode.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            osc.start();
+
+            setupScrollObserver();
+        }
+
+        function makeDistortionCurve(amount) {
+            let k = typeof amount === 'number' ? amount : 50, n_samples = 44100, curve = new Float32Array(n_samples);
+            for (let i = 0; i < n_samples; ++i ) {
+                let x = i * 2 / n_samples - 1;
+                curve[i] = ( 3 + k ) * x * 20 * ( Math.PI / 180 ) / ( Math.PI + k * Math.abs(x) );
+            }
+            return curve;
+        }
+
+        // 2. ИНТЕРАКТИВ ОТ КУРСОРОВ
+        const glitchChars = 'АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ!@#$%^&*()';
+        document.addEventListener('mousemove', (e) => {
+            if (audioCtx && distortionNode && gainNode.gain.value > 0.01) { // Искажаем только если гул активен
+                let speed = Math.abs(e.movementX) + Math.abs(e.movementY);
+                distortionNode.curve = makeDistortionCurve(Math.min(speed * 2, 400));
+            }
+            if (Math.random() > 0.5) {
+                let drop = document.createElement('div');
+                drop.classList.add('trail-drop');
+                drop.innerText = glitchChars[Math.floor(Math.random() * glitchChars.length)];
+                drop.style.left = e.clientX + (Math.random() * 20 - 10) + 'px';
+                drop.style.top = e.clientY + (Math.random() * 20 - 10) + 'px';
+                document.body.appendChild(drop);
+                setTimeout(() => drop.remove(), 1500);
+            }
         });
 
-        // 3. НАРУШЕНИЕ ПРИЧИННО-СЛЕДСТВЕННЫХ СВЯЗЕЙ (Glitch Text)
+        // 3. ОТСЛЕЖИВАНИЕ СКРОЛЛА (Погружение в пустоту)
+        function setupScrollObserver() {
+            const merchSection = document.getElementById('merch-section');
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        // Мы в разделе МЕРЧ: гасим агрессивный дисторшн, включаем Эмбиент из Майнкрафта
+                        if (gainNode) gainNode.gain.setTargetAtTime(0.005, audioCtx.currentTime, 1);
+                        fadeEnderAudio(0.7, 2000); // Громкость 0.7 за 2 секунды
+                    } else {
+                        // Ушли из раздела: возвращаем дисторшн, гасим Эмбиент
+                        if (gainNode && terminal.style.display !== 'flex') {
+                            gainNode.gain.setTargetAtTime(0.05, audioCtx.currentTime, 1);
+                        }
+                        fadeEnderAudio(0, 2000);
+                    }
+                });
+            }, { threshold: 0.4 }); // Срабатывает, когда видно 40% раздела мерча
+            observer.observe(merchSection);
+        }
+
+        // Анимации и Глитчи (без изменений)
+        const filterNoise = document.getElementById('noise-anim');
+        let phase = 0;
+        function animateFlesh() { phase += 0.05; filterNoise.setAttribute('baseFrequency', `0.01 ${0.1 + Math.sin(phase) * 0.05}`); requestAnimationFrame(animateFlesh); }
+        animateFlesh();
+
         const textElement = document.getElementById('scramble-text');
         const originalText = textElement.innerText;
-        const glitchChars = 'АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ0123456789!@#$%^&*()_+-=';
-
         function glitchText() {
-            // Вероятность глитча - непредсказуемость
             if (Math.random() > 0.9) {
                 let currentText = originalText.split('');
-                // Ломаем 2-5 случайных символов
                 let breaks = Math.floor(Math.random() * 4) + 2; 
                 for(let i=0; i<breaks; i++) {
                     let idx = Math.floor(Math.random() * currentText.length);
-                    if(currentText[idx] !== ' ') {
-                        currentText[idx] = glitchChars[Math.floor(Math.random() * glitchChars.length)];
-                    }
+                    if(currentText[idx] !== ' ') currentText[idx] = glitchChars[Math.floor(Math.random() * glitchChars.length)];
                 }
                 textElement.innerText = currentText.join('');
-                textElement.style.color = '#fff';
-            } else {
-                textElement.innerText = originalText;
-                textElement.style.color = '#888';
-            }
-            // Резкие, неприятные интервалы
+            } else textElement.innerText = originalText;
             setTimeout(glitchText, Math.random() * 200 + 50);
         }
         glitchText();
 
-        // 4. ДЕЙСТВИЕ КНОПКИ (Имитация закрытой тусовки)
-        function requestInvite() {
-            const btn = document.querySelector('.invite-btn');
-            btn.style.background = 'var(--flesh-red)';
-            btn.style.color = '#fff';
-            btn.style.borderColor = 'var(--flesh-red)';
-            btn.innerText = 'ОЖИДАЙТЕ В ТЕМНОТЕ...';
+        const rosterItems = document.querySelectorAll('.roster-item');
+        const dynamicBg = document.getElementById('dynamic-bg');
+        let hoverAudio = new Audio();
+        rosterItems.forEach(item => {
+            item.addEventListener('mouseenter', () => {
+                const bgPath = item.getAttribute('data-bg'); if(bgPath) { dynamicBg.style.backgroundImage = `url(${bgPath})`; dynamicBg.style.opacity = 1; }
+                const audioPath = item.getAttribute('data-audio'); if(audioPath) { hoverAudio.src = audioPath; hoverAudio.volume = 0.5; hoverAudio.play().catch(e=>{}); }
+                document.body.style.filter = "invert(1) hue-rotate(180deg)";
+            });
+            item.addEventListener('mouseleave', () => {
+                dynamicBg.style.opacity = 0; hoverAudio.pause(); hoverAudio.currentTime = 0; document.body.style.filter = "none";
+            });
+        });
+
+        // --- ТЕРМИНАЛ И ПАРОЛЬ (Также погружает в пустоту) ---
+        const terminal = document.getElementById('terminal');
+        const termInput = document.getElementById('term-input');
+        const termError = document.getElementById('term-error');
+
+        function openTerminal() {
+            terminal.style.display = 'flex';
+            setTimeout(() => termInput.focus(), 100);
             
-            // Легкий скример / помеха при нажатии
-            document.body.style.filter = 'invert(1)';
-            setTimeout(() => {
-                document.body.style.filter = 'none';
-                // Здесь можно вставить редирект на Telegram бота:
-                // window.location.href = 'https://t.me/your_bot';
-            }, 150);
+            // Включаем Эмбиент из Майнкрафта в терминале
+            if(gainNode) gainNode.gain.setTargetAtTime(0, audioCtx.currentTime, 0.5);
+            fadeEnderAudio(0.8, 1000);
         }
+
+        function closeTerminal() {
+            terminal.style.display = 'none';
+            termInput.value = '';
+            termError.style.opacity = 0;
+            
+            // Возвращаем обычный шум, если мы не на разделе Мерча
+            const merchRect = document.getElementById('merch-section').getBoundingClientRect();
+            if(merchRect.top > window.innerHeight || merchRect.bottom < 0) {
+                if(gainNode) gainNode.gain.setTargetAtTime(0.05, audioCtx.currentTime, 0.5);
+                fadeEnderAudio(0, 1000);
+            }
+        }
+
+        termInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                const password = termInput.value.toUpperCase().trim();
+                if (password === 'СИМБИОЗ' || password === 'ENTER') { 
+                    termInput.style.color = "#00ff00"; termInput.value = "ДОСТУП РАЗРЕШЕН...";
+                    setTimeout(() => { window.location.href = "https://t.me/your_secret_channel"; }, 1500);
+                } else {
+                    termError.style.opacity = 1; document.body.style.transform = "translate(10px, -10px)";
+                    setTimeout(() => document.body.style.transform = "none", 100);
+                    termInput.value = '';
+                }
+            }
+        });
     </script>
 </body>
 </html>
