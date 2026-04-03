@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ОВЕРЛАУД | OVERLOUD</title>
+    <style>
+        /* БАЗА: Модный брутализм и тьма */
+        :root {
+            --bg-color: #030303;
+            --text-color: #e0e0e0;
+            --flesh-red: #660000;
+            --accent: #ff0000;
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            overflow: hidden; /* Запираем пользователя внутри */
+            cursor: crosshair; /* Резкий, неприятный курсор */
+        }
+
+        /* ПОМЕХИ И СТАТИКА (Шум на фоне) */
+        .noise {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            pointer-events: none;
+            z-index: 50;
+            opacity: 0.08;
+            background: url('data:image/svg+xml,%3Csvg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"%3E%3Cfilter id="noiseFilter"%3E%3CfeTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" stitchTiles="stitch"/%3E%3C/filter%3E%3Crect width="100%25" height="100%25" filter="url(%23noiseFilter)"/%3E%3C/svg%3E');
+            animation: noiseMove 0.2s infinite linear;
+        }
+
+        @keyframes noiseMove {
+            0% { transform: translate(0, 0); }
+            10% { transform: translate(-5%, -5%); }
+            20% { transform: translate(-10%, 5%); }
+            30% { transform: translate(5%, -10%); }
+            40% { transform: translate(-5%, 15%); }
+            50% { transform: translate(-10%, 5%); }
+            60% { transform: translate(15%, 0); }
+            70% { transform: translate(0, 10%); }
+            80% { transform: translate(-15%, 0); }
+            90% { transform: translate(10%, 5%); }
+            100% { transform: translate(5%, 0); }
+        }
+
+        /* КОНТЕЙНЕР (Центр культа) */
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            position: relative;
+            z-index: 10;
+        }
+
+        /* ЛОГОТИП ОМ (Амальгама и Плоть) */
+        .om-logo {
+            font-size: 15rem;
+            color: var(--bg-color);
+            text-shadow: 0 0 2px #fff, 0 0 10px var(--text-color), 0 0 20px var(--flesh-red);
+            /* Применяем SVG фильтр для эффекта живой, неприятной плоти */
+            filter: url(#flesh-distort);
+            animation: breathe 4s infinite alternate ease-in-out;
+            user-select: none;
+            line-height: 1;
+            margin-bottom: -20px;
+        }
+
+        /* Дыхание неживого */
+        @keyframes breathe {
+            0% { transform: scale(0.95) skewX(-2deg); opacity: 0.8; }
+            100% { transform: scale(1.05) skewX(2deg); opacity: 1; text-shadow: 0 0 5px #fff, 0 0 30px var(--flesh-red), 0 0 50px #ff0000; }
+        }
+
+        /* НАЗВАНИЕ БРЕНДА (Модный акцент) */
+        .brand {
+            font-size: 3rem;
+            font-weight: 900;
+            letter-spacing: 0.5rem;
+            text-transform: uppercase;
+            margin: 0;
+            z-index: 10;
+            mix-blend-mode: exclusion;
+        }
+
+        /* ТЕКСТ (Нарушение связей) */
+        .manifesto {
+            margin-top: 2rem;
+            font-size: 0.9rem;
+            letter-spacing: 0.2rem;
+            color: #888;
+            text-align: center;
+            max-width: 600px;
+            text-transform: uppercase;
+            font-weight: bold;
+        }
+
+        /* СМОТРЯЩИЕ ЗА ТОБОЙ (Глаза во тьме) */
+        .watcher {
+            position: absolute;
+            width: 10px; height: 10px;
+            background: radial-gradient(circle, #fff 10%, var(--flesh-red) 50%, transparent 80%);
+            border-radius: 50%;
+            opacity: 0;
+            transition: opacity 2s, transform 0.1s;
+            pointer-events: none;
+            filter: blur(2px);
+            z-index: 1;
+        }
+
+        /* КНОПКА (Тусовка в квартире) */
+        .invite-btn {
+            margin-top: 4rem;
+            padding: 15px 40px;
+            background: transparent;
+            color: var(--text-color);
+            border: 1px solid var(--text-color);
+            font-size: 0.8rem;
+            letter-spacing: 0.3rem;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+            overflow: hidden;
+            z-index: 20;
+        }
+
+        .invite-btn:hover {
+            background: var(--text-color);
+            color: var(--bg-color);
+            box-shadow: 0 0 20px var(--text-color);
+            /* Резкий сдвиг при наведении */
+            transform: translate(-2px, -2px); 
+        }
+
+        /* Виньетка для клаустрофобии */
+        .vignette {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background: radial-gradient(circle at center, transparent 30%, #000 90%);
+            pointer-events: none;
+            z-index: 40;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- SVG Фильтр для эффекта "живой плоти / амальгамы" -->
+    <svg style="display: none;">
+        <defs>
+            <filter id="flesh-distort">
+                <!-- Генерируем "мясную" текстуру -->
+                <feTurbulence type="fractalNoise" baseFrequency="0.01 0.15" numOctaves="3" result="warp" id="noise-anim"/>
+                <!-- Искажаем ОМ с помощью текстуры -->
+                <feDisplacementMap in="SourceGraphic" in2="warp" scale="30" xChannelSelector="R" yChannelSelector="G"/>
+            </filter>
+        </defs>
+    </svg>
+
+    <div class="noise"></div>
+    <div class="vignette"></div>
+
+    <!-- Смотрящие (создаются через JS) -->
+    <div id="watchers-container"></div>
+
+    <div class="container">
+        <div class="om-logo">ॐ</div>
+        <h1 class="brand">ОВЕРЛАУД</h1>
+        
+        <!-- Текст, который будет искажаться (Нарушение причинно-следственных связей) -->
+        <div class="manifesto" id="scramble-text">
+            ПЛОТЬ ДЫШИТ. ПРИЧИНЫ НЕТ. СЛЕДСТВИЯ НЕТ. МЫ СМОТРИМ.
+        </div>
+
+        <!-- Отсылка к Boiler Room в квартире -->
+        <button class="invite-btn" onclick="requestInvite()">Вход в квартиру</button>
+    </div>
+
+    <script>
+        // 1. АНИМАЦИЯ ПЛОТИ (Изменение SVG фильтра во времени)
+        const filterNoise = document.getElementById('noise-anim');
+        let phase = 0;
+        function animateFlesh() {
+            phase += 0.05;
+            // Делаем так, чтобы искажение "текло"
+            filterNoise.setAttribute('baseFrequency', `0.01 ${0.1 + Math.sin(phase) * 0.05}`);
+            requestAnimationFrame(animateFlesh);
+        }
+        animateFlesh();
+
+        // 2. СМОТРЯЩИЕ ЗА ТОБОЙ (Глаза реагируют на курсор)
+        const watchersContainer = document.getElementById('watchers-container');
+        const numWatchers = 6; // Количество глаз во тьме
+        const watchers = [];
+
+        for (let i = 0; i < numWatchers; i++) {
+            let w = document.createElement('div');
+            w.classList.add('watcher');
+            // Раскидываем случайно по экрану
+            w.style.left = Math.random() * 100 + 'vw';
+            w.style.top = Math.random() * 100 + 'vh';
+            watchersContainer.appendChild(w);
+            watchers.push(w);
+        }
+
+        document.addEventListener('mousemove', (e) => {
+            const mouseX = e.clientX;
+            const mouseY = e.clientY;
+
+            watchers.forEach(w => {
+                const rect = w.getBoundingClientRect();
+                const watcherX = rect.left + rect.width / 2;
+                const watcherY = rect.top + rect.height / 2;
+                
+                // Вычисляем угол к курсору
+                const angle = Math.atan2(mouseY - watcherY, mouseX - watcherX);
+                const distance = Math.hypot(mouseX - watcherX, mouseY - watcherY);
+
+                // Если курсор близко, "глаза" открываются (opacity) и следят
+                if (distance < 400) {
+                    w.style.opacity = (400 - distance) / 400;
+                    const moveX = Math.cos(angle) * 15;
+                    const moveY = Math.sin(angle) * 15;
+                    w.style.transform = `translate(${moveX}px, ${moveY}px)`;
+                } else {
+                    w.style.opacity = 0;
+                }
+            });
+        });
+
+        // 3. НАРУШЕНИЕ ПРИЧИННО-СЛЕДСТВЕННЫХ СВЯЗЕЙ (Glitch Text)
+        const textElement = document.getElementById('scramble-text');
+        const originalText = textElement.innerText;
+        const glitchChars = 'АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ0123456789!@#$%^&*()_+-=';
+
+        function glitchText() {
+            // Вероятность глитча - непредсказуемость
+            if (Math.random() > 0.9) {
+                let currentText = originalText.split('');
+                // Ломаем 2-5 случайных символов
+                let breaks = Math.floor(Math.random() * 4) + 2; 
+                for(let i=0; i<breaks; i++) {
+                    let idx = Math.floor(Math.random() * currentText.length);
+                    if(currentText[idx] !== ' ') {
+                        currentText[idx] = glitchChars[Math.floor(Math.random() * glitchChars.length)];
+                    }
+                }
+                textElement.innerText = currentText.join('');
+                textElement.style.color = '#fff';
+            } else {
+                textElement.innerText = originalText;
+                textElement.style.color = '#888';
+            }
+            // Резкие, неприятные интервалы
+            setTimeout(glitchText, Math.random() * 200 + 50);
+        }
+        glitchText();
+
+        // 4. ДЕЙСТВИЕ КНОПКИ (Имитация закрытой тусовки)
+        function requestInvite() {
+            const btn = document.querySelector('.invite-btn');
+            btn.style.background = 'var(--flesh-red)';
+            btn.style.color = '#fff';
+            btn.style.borderColor = 'var(--flesh-red)';
+            btn.innerText = 'ОЖИДАЙТЕ В ТЕМНОТЕ...';
+            
+            // Легкий скример / помеха при нажатии
+            document.body.style.filter = 'invert(1)';
+            setTimeout(() => {
+                document.body.style.filter = 'none';
+                // Здесь можно вставить редирект на Telegram бота:
+                // window.location.href = 'https://t.me/your_bot';
+            }, 150);
+        }
+    </script>
+</body>
+</html>
