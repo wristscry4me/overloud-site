@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>МЕРЧ | OVERLOUD</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;900&display=swap" rel="stylesheet">
+    <style>
+        :root { --bg-color: #030303; --text-color: #e0e0e0; --flesh-red: #8b0000; --accent: #ff0000; }
+        body, html { margin: 0; padding: 0; background-color: var(--bg-color); color: var(--text-color); font-family: 'Inter', sans-serif; -webkit-font-smoothing: antialiased; overflow-x: hidden; cursor: crosshair; }
+        a { text-decoration: none; color: inherit; cursor: crosshair; }
+        
+        .navbar { position: fixed; top: 0; left: 0; width: 100%; padding: 20px 40px; display: flex; gap: 30px; z-index: 100; box-sizing: border-box; background: rgba(3,3,3,0.9); border-bottom: 1px solid #111; }
+        .nav-link { font-size: 0.75rem; letter-spacing: 0.2rem; text-transform: uppercase; font-weight: 600; transition: color 0.2s; }
+        .nav-link:hover { color: var(--flesh-red); }
+        .nav-active { color: var(--flesh-red); pointer-events: none; }
+
+        .page-container { padding: 120px 2rem 4rem 2rem; max-width: 1200px; margin: 0 auto; min-height: 80vh; }
+        .page-title { font-size: 4rem; font-weight: 900; letter-spacing: 0.5rem; text-transform: uppercase; margin-bottom: 1rem; border-bottom: 2px solid var(--flesh-red); padding-bottom: 1rem; }
+        .page-subtitle { font-size: 1rem; color: #666; margin-bottom: 3rem; letter-spacing: 0.2rem; text-transform: uppercase; }
+        
+        .merch-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 3rem; }
+        .merch-card { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 1rem; padding: 2rem; border: 1px solid transparent; transition: 0.3s; }
+        .merch-card:hover { border-color: #333; background: #080808; }
+        
+        .merch-image-box { width: 100%; aspect-ratio: 3/4; background: #111; display: flex; justify-content: center; align-items: center; color: #333; font-weight: 900; letter-spacing: 0.2rem; filter: grayscale(100%); transition: 0.3s; border: 1px solid #222; }
+        .merch-card:hover .merch-image-box { filter: grayscale(0%) invert(1); }
+        
+        .merch-name { font-size: 1.2rem; font-weight: 900; letter-spacing: 0.1rem; margin: 0; text-transform: uppercase; }
+        .merch-price { font-size: 1rem; color: #aaa; font-weight: 600; }
+        .sold-out { text-decoration: line-through; color: var(--flesh-red); }
+        
+        .btn-buy { margin-top: 1rem; padding: 10px 30px; background: transparent; color: var(--text-color); border: 1px solid var(--text-color); font-size: 0.7rem; font-weight: 600; letter-spacing: 0.2rem; text-transform: uppercase; transition: 0.2s; width: 100%; box-sizing: border-box; }
+        .btn-buy:hover { background: var(--text-color); color: var(--bg-color); }
+        .btn-sold { border-color: #333; color: #555; pointer-events: none; }
+
+        .footer { width: 100%; border-top: 1px solid #111; padding: 4rem 2rem; display: flex; justify-content: space-around; flex-wrap: wrap; gap: 2rem; background: #010101; box-sizing: border-box; margin-top: 4rem; }
+        .footer-col { display: flex; flex-direction: column; gap: 1rem; }
+        .footer-title { font-size: 0.8rem; font-weight: 900; color: var(--flesh-red); letter-spacing: 0.3rem; margin-bottom: 1rem; }
+        .btn-small { padding: 8px 20px; font-size: 0.7rem; border: 1px solid var(--text-color); text-transform: uppercase; letter-spacing: 0.2rem; transition: 0.2s; display: inline-block; font-weight: 600; }
+        .btn-small:hover { background: var(--text-color); color: var(--bg-color); }
+        
+        .trail-drop { position: fixed; color: var(--flesh-red); font-size: 10px; pointer-events: none; z-index: 999; animation: fadeDrop 1.5s forwards; }
+        @keyframes fadeDrop { 0% { opacity: 1; transform: scale(1); } 100% { opacity: 0; transform: scale(3) translateY(20px); } }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <a href="index.html" class="nav-link">НА ГЛАВНУЮ</a>
+        <a href="about.html" class="nav-link">О ЛЕЙБЛЕ</a>
+        <a href="artists.html" class="nav-link">АРТИСТЫ</a>
+        <a href="merch.html" class="nav-link nav-active">МЕРЧ</a>
+    </nav>
+
+    <div class="page-container">
+        <div class="page-title" id="glitch-title">МАТЕРИАЛИЗАЦИЯ</div>
+        <div class="page-subtitle">ФИЗИЧЕСКИЕ АРТЕФАКТЫ ЛЕЙБЛА</div>
+        
+        <div class="merch-grid">
+            <!-- Товар 1 (Распродан) -->
+            <div class="merch-card">
+                <div class="merch-image-box">[КАССЕТА]</div>
+                <h2 class="merch-name sold-out">OVERLOUD REVIVAL TAPE</h2>
+                <div class="merch-price sold-out">990 RUB</div>
+                <button class="btn-buy btn-sold">ИЗЪЯТО (SOLD OUT)</button>
+            </div>
+            
+            <!-- Товар 2 (Доступен) -->
+            <div class="merch-card">
+                <div class="merch-image-box">[ФУТБОЛКА]</div>
+                <h2 class="merch-name">ФУТБОЛКА "СИМБИОЗ"</h2>
+                <div class="merch-price">2500 RUB</div>
+                <a href="mailto:om@owerloud.com?subject=ЗАКАЗ%20ФУТБОЛКИ" class="btn-buy" style="text-align:center;">МАТЕРИАЛИЗОВАТЬ</a>
+            </div>
+
+            <!-- Товар 3 (Доступен) -->
+            <div class="merch-card">
+                <div class="merch-image-box">[СТИКЕРПАК]</div>
+                <h2 class="merch-name">СИГИЛЫ (STICKER PACK)</h2>
+                <div class="merch-price">500 RUB</div>
+                <a href="mailto:om@owerloud.com?subject=ЗАКАЗ%20СТИКЕРОВ" class="btn-buy" style="text-align:center;">МАТЕРИАЛИЗОВАТЬ</a>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="footer-col">
+            <div class="footer-title">СВЯЗЬ</div>
+            <a href="mailto:om@owerloud.com" class="nav-link" style="color:#aaa;">OM@OWERLOUD.COM</a>
+            <a href="#" class="nav-link" style="color:#aaa;">TELEGRAM CHANNEL</a>
+        </div>
+        <div class="footer-col">
+            <div class="footer-title">АССИМИЛЯЦИЯ (DEMO DROP)</div>
+            <p style="font-size: 0.8rem; color: #666; max-width: 300px; line-height: 1.6;">Пришлите приватную ссылку на Soundcloud. Не прикрепляйте mp3 к письму.</p>
+            <a href="mailto:om@owerloud.com?subject=OVERLOUD%20DEMO%20DROP" class="btn-small">ОТПРАВИТЬ ПЛОТЬ</a>
+        </div>
+    </footer>
+
+    <script>
+        const glitchChars = 'АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ!@#$%^&*()';
+        document.addEventListener('mousemove', (e) => {
+            if (Math.random() > 0.6) {
+                let drop = document.createElement('div');
+                drop.classList.add('trail-drop');
+                drop.innerText = glitchChars[Math.floor(Math.random() * glitchChars.length)];
+                drop.style.left = e.clientX + (Math.random() * 20 - 10) + 'px';
+                drop.style.top = e.clientY + (Math.random() * 20 - 10) + 'px';
+                document.body.appendChild(drop);
+                setTimeout(() => drop.remove(), 1500);
+            }
+        });
+        const title = document.getElementById('glitch-title');
+        const origText = title.innerText;
+        setInterval(() => {
+            if(Math.random() > 0.8) {
+                let arr = origText.split('');
+                arr[Math.floor(Math.random() * arr.length)] = glitchChars[Math.floor(Math.random() * glitchChars.length)];
+                title.innerText = arr.join('');
+            } else { title.innerText = origText; }
+        }, 100);
+    </script>
+</body>
+</html>
