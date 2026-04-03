@@ -108,8 +108,8 @@
 </head>
 <body>
 
-    <!-- ЭМБИЕНТ ТУТ -->
-    <audio id="ender-audio" src="assets/ender_ambient.mp3" loop></audio>
+    <!-- ЭМБИЕНТ ТУТ (Без папки assets) -->
+    <audio id="ender-audio" src="ender_ambient.mp3" loop></audio>
 
     <svg style="display: none;">
         <defs>
@@ -141,15 +141,16 @@
     <div class="section">
         <div class="roster-title">СИМБИОНТЫ</div>
         <ul class="roster-list">
-            <li class="roster-item" data-bg="assets/artist1.gif" data-audio="assets/noise_burst.mp3">ТВОЙ НИКНЕЙМ</li>
-            <li class="roster-item" data-bg="assets/artist2.gif" data-audio="assets/noise_burst.mp3">АРТИСТ 2</li>
+            <!-- Пути к картинкам и звукам тоже изменены: без папки assets -->
+            <li class="roster-item" data-bg="artist1.gif" data-audio="noise_burst.mp3">ТВОЙ НИКНЕЙМ</li>
+            <li class="roster-item" data-bg="artist2.gif" data-audio="noise_burst.mp3">АРТИСТ 2</li>
             <li class="roster-item" data-bg="" data-audio="">АРТИСТ 3</li>
         </ul>
     </div>
 
     <!-- СЕКЦИЯ 3: МЕРЧ -->
     <div class="section" id="merch-section">
-        <div class="roster-title">��АТЕРИАЛИЗАЦИЯ</div>
+        <div class="roster-title">МАТЕРИАЛИЗАЦИЯ</div>
         <div class="merch-grid">
             <div class="merch-item">
                 <div class="merch-img-placeholder">[ИЗОБРАЖЕНИЕ ОБЪЕКТА]</div>
@@ -176,7 +177,6 @@
         let audioCtx, osc, gainNode, distortionNode;
         const enderAudio = document.getElementById('ender-audio');
         
-        // Надежная функция изменения громкости
         function setVolumeFade(audioElement, targetVolume) {
             if (audioElement.fadeInterval) clearInterval(audioElement.fadeInterval);
             audioElement.fadeInterval = setInterval(() => {
@@ -191,21 +191,17 @@
             }, 50);
         }
 
-        // 1. ИНИЦИАЛИЗАЦИЯ
         async function initExperience() {
             document.getElementById('init-screen').style.display = 'none';
             
-            // ВАЖНО: Стартуем эмбиент СРАЗУ при клике на черный экран, но с нулевой громкостью
             enderAudio.volume = 0;
-            enderAudio.play().catch(e => console.error("Ошибка аудио. Проверьте путь к файлу:", e));
+            enderAudio.play().catch(e => console.error("Ошибка аудио. Проверьте имя файла:", e));
 
-            // Запуск камеры
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({ video: true });
                 document.getElementById('camera-feed').srcObject = stream;
             } catch (err) { console.log("Камера отклонена."); }
 
-            // Запуск дроуна/перегруза
             audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             osc = audioCtx.createOscillator();
             gainNode = audioCtx.createGain();
@@ -223,7 +219,6 @@
             gainNode.connect(audioCtx.destination);
             osc.start();
 
-            // Включаем слежку за скроллом
             setupScrollObserver();
         }
 
@@ -236,7 +231,6 @@
             return curve;
         }
 
-        // 2. ИНТЕРАКТИВ ОТ КУРСОРОВ
         const glitchChars = 'АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ!@#$%^&*()';
         document.addEventListener('mousemove', (e) => {
             if (audioCtx && distortionNode && gainNode.gain.value > 0.01) {
@@ -254,16 +248,13 @@
             }
         });
 
-        // 3. ОТСЛЕЖИВАНИЕ СКРОЛЛА (ЗДЕСЬ МАГИЯ ЭМБИЕНТА)
         function setupScrollObserver() {
             const merchSection = document.getElementById('merch-section');
             const observer = new IntersectionObserver((entries) => {
                 if (entries[0].isIntersecting) {
-                    // Мы внизу: включаем эмбиент, гасим шум
                     setVolumeFade(enderAudio, 0.8);
                     if (gainNode) gainNode.gain.setTargetAtTime(0.005, audioCtx.currentTime, 0.5);
                 } else {
-                    // Мы наверху: гасим эмбиент, включаем шум
                     setVolumeFade(enderAudio, 0);
                     if (gainNode && document.getElementById('terminal').style.display !== 'flex') {
                         gainNode.gain.setTargetAtTime(0.05, audioCtx.currentTime, 0.5);
@@ -273,7 +264,6 @@
             observer.observe(merchSection);
         }
 
-        // Анимации
         const filterNoise = document.getElementById('noise-anim');
         let phase = 0;
         function animateFlesh() { phase += 0.05; filterNoise.setAttribute('baseFrequency', `0.01 ${0.1 + Math.sin(phase) * 0.05}`); requestAnimationFrame(animateFlesh); }
@@ -309,7 +299,6 @@
             });
         });
 
-        // --- ТЕРМИНАЛ И ПАРОЛЬ ---
         const terminal = document.getElementById('terminal');
         const termInput = document.getElementById('term-input');
         const termError = document.getElementById('term-error');
@@ -318,7 +307,6 @@
             terminal.style.display = 'flex';
             setTimeout(() => termInput.focus(), 100);
             
-            // В терминале включаем эмбиент на максимум, шум отключаем
             if(gainNode) gainNode.gain.setTargetAtTime(0, audioCtx.currentTime, 0.5);
             setVolumeFade(enderAudio, 1.0);
         }
