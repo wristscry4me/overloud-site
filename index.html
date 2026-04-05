@@ -3,278 +3,318 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OVERLOUD | ОВЕРЛАУД</title>
+    <title>ОВЕРЛАУД | OVERLOUD</title>
     
-    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;900&display=swap" rel="stylesheet">
 
     <style>
+        /* --- БАЗА И ПЕРЕМЕННЫЕ --- */
         :root {
-            --bg: #020202;
-            --flesh: #8a0303;
-            --text: #dcdcd2;
-            --glitch: #ff0000;
+            --bg-color: #030303;
+            --text-color: #e0e0e0;
+            --flesh-red: #8b0000;
+            --accent: #ff0000;
         }
 
+        /* Убрано height: 100%; чтобы скролл считался правильно */
         body, html {
-            margin: 0; padding: 0; width: 100vw; height: 100vh;
-            background-color: var(--bg); color: var(--text);
-            font-family: 'Space Mono', monospace;
-            overflow: hidden; /* Запрещаем скролл. Выхода нет. */
-            cursor: crosshair; user-select: none;
+            margin: 0; padding: 0; width: 100%; 
+            background-color: var(--bg-color); color: var(--text-color);
+            font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            text-rendering: optimizeLegibility;
+            overflow-x: hidden; cursor: crosshair;
         }
 
-        /* --- СМОТРЯЩИЕ (Холст на заднем фоне) --- */
-        #watchers-canvas {
-            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-            z-index: 1; pointer-events: none; opacity: 0.6;
-        }
+        a { text-decoration: none; color: inherit; cursor: crosshair; }
 
-        /* --- ЖИВОЕ СЕРДЦЕ (ОМ) В ЦЕНТРЕ --- */
-        .monolith-container {
-            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            z-index: 10; display: flex; flex-direction: column; align-items: center;
+        /* --- НАВИГАЦИЯ (МЕНЮ СЛЕВА В СТОЛБЕЦ) --- */
+        .navbar {
+            position: fixed; 
+            top: 0; left: 0; 
+            height: 100vh; /* Меню на всю высоту экрана */
+            padding: 0 40px; 
+            display: flex; 
+            flex-direction: column; /* Элементы в столбец */
+            justify-content: center; /* Центрируем по вертикали */
+            gap: 30px; 
+            z-index: 100; 
+            box-sizing: border-box;
+            mix-blend-mode: exclusion; /* Текст инвертируется на белом фоне */
+            pointer-events: none; /* Чтобы пространство между ссылками не блокировало клики по сайту */
         }
-        
-        .om-core {
-            font-size: clamp(10rem, 25vw, 20rem); color: var(--bg);
-            text-shadow: 0 0 30px var(--flesh), 0 0 10px #fff;
-            filter: url(#flesh-distort);
-            animation: breathe 5s infinite alternate ease-in-out;
-            transition: text-shadow 0.3s;
+        .nav-link {
+            pointer-events: auto; /* Включаем клики только для самих ссылок */
+            font-size: 0.75rem; letter-spacing: 0.2rem; text-transform: uppercase;
+            font-weight: 600; transition: color 0.2s;
+            width: max-content; /* Чтобы текст не переносился на новую строку */
         }
-        .om-core:hover {
-            text-shadow: 0 0 80px var(--glitch), 0 0 20px #fff;
-        }
-        @keyframes breathe {
-            0% { transform: scale(0.95); opacity: 0.8; }
-            100% { transform: scale(1.05); opacity: 1; }
-        }
+        .nav-link:hover { color: var(--flesh-red); text-shadow: 0 0 10px var(--accent); transform: translateX(10px); }
 
-        .core-text {
-            margin-top: -2rem; font-size: 1.5rem; font-weight: 700; letter-spacing: 1rem;
-            color: var(--flesh); mix-blend-mode: screen; text-align: center;
-        }
-
-        /* --- НАВИГАЦИЯ (Раскидана по краям) --- */
-        .edge-nav {
-            position: absolute; z-index: 20; text-transform: uppercase;
-            font-size: 0.8rem; letter-spacing: 0.3rem; font-weight: 700;
-            color: #555; transition: 0.3s; cursor: crosshair;
-        }
-        .edge-nav:hover { color: var(--text); text-shadow: 0 0 10px var(--flesh); letter-spacing: 0.5rem; }
-
-        .nav-top { top: 2rem; left: 50%; transform: translateX(-50%); }
-        .nav-bottom { bottom: 2rem; left: 50%; transform: translateX(-50%); }
-        .nav-left { left: 2rem; top: 50%; transform: translateY(-50%) rotate(-90deg); }
-        .nav-right { right: 2rem; top: 50%; transform: translateY(-50%) rotate(90deg); }
-
-        /* --- ВСПЛЫВАЮЩИЕ ОКНА (ИНТЕРФЕЙС ТЕРМИНАЛА) --- */
-        .overlay {
-            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-            background: rgba(2,2,2,0.95); z-index: 50; display: none;
-            flex-direction: column; justify-content: center; align-items: center;
-            opacity: 0; transition: opacity 0.5s;
-        }
-        
-        /* Эффект ЭЛТ-монитора для окон */
-        .crt-scanline {
-            position: absolute; top: 0; left: 0; width: 100%; height: 10px;
-            background: rgba(255,0,0,0.1); opacity: 0.4;
-            animation: scan 4s linear infinite; pointer-events: none; z-index: 55;
-        }
-        @keyframes scan { 0% { top: -10px; } 100% { top: 100%; } }
-
-        .overlay-content {
-            width: 80%; max-width: 800px; max-height: 80vh; overflow-y: auto;
-            border: 1px solid var(--flesh); padding: 3rem; position: relative;
-            background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(138,3,3,0.05) 2px, rgba(138,3,3,0.05) 4px);
-        }
-        
-        /* Скрываем стандартный ползунок скролла внутри окон */
-        .overlay-content::-webkit-scrollbar { width: 5px; }
-        .overlay-content::-webkit-scrollbar-thumb { background: var(--flesh); }
-
-        .close-btn {
-            position: absolute; top: 1rem; right: 1rem; color: var(--flesh);
-            font-size: 1rem; cursor: crosshair; font-weight: 700; border: none; background: transparent;
-        }
-        .close-btn:hover { color: #fff; }
-
-        /* --- КОНТЕНТ ВНУТРИ ОКОН --- */
-        h2.overlay-title { font-size: 2rem; color: var(--flesh); margin-top: 0; border-bottom: 1px solid #333; padding-bottom: 1rem; }
-        
-        /* Артисты */
-        .roster-grid { display: flex; flex-direction: column; gap: 2rem; }
-        .roster-item { border-left: 3px solid var(--flesh); padding-left: 1rem; }
-        .roster-item h3 { margin: 0 0 0.5rem 0; font-size: 1.5rem; color: var(--text); }
-        .roster-item p { margin: 0; color: #666; font-size: 0.8rem; }
-        
-        /* Мерч */
-        .merch-list { display: flex; gap: 2rem; overflow-x: auto; padding-bottom: 1rem; }
-        .merch-item { min-width: 200px; border: 1px solid #333; padding: 1rem; text-align: center; }
-        .merch-box { width: 100%; height: 150px; background: #0a0a0a; margin-bottom: 1rem; display: flex; align-items: center; justify-content: center; color: #333;}
-        
-        /* Кнопки */
-        .btn {
-            display: inline-block; padding: 10px 20px; background: transparent; color: var(--text);
-            border: 1px solid var(--flesh); font-size: 0.8rem; text-transform: uppercase; cursor: crosshair; transition: 0.3s;
-        }
-        .btn:hover { background: var(--flesh); color: var(--bg); }
-
-        /* Экран инициации */
-        #init-screen { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: var(--bg); z-index: 3000; display: flex; justify-content: center; align-items: center; cursor: pointer; }
-        .init-text { animation: pulseText 2s infinite; font-size: 1.2rem; }
-
-        /* ARG Терминал */
-        #term-input { background: transparent; border: none; border-bottom: 1px solid var(--flesh); color: #fff; font-size: 2rem; text-align: center; outline: none; font-family: monospace; width: 100%; }
-
+        /* Мобильная адаптация меню (На телефонах возвращаем наверх, чтобы не ломать экран) */
         @media (max-width: 768px) {
-            .nav-left { left: -2rem; } .nav-right { right: -2rem; }
-            .overlay-content { width: 95%; padding: 1.5rem; }
+            .navbar { 
+                height: auto; padding: 15px 20px; 
+                flex-direction: row; justify-content: center; flex-wrap: wrap; gap: 15px; 
+                background: rgba(0,0,0,0.8); border-bottom: 1px solid #111;
+            }
+            .nav-link { font-size: 0.65rem; letter-spacing: 0.1rem; transform: none !important; }
+        }
+
+        /* --- ЭКРАН ИНИЦИАЦИИ --- */
+        #init-screen {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: #000; z-index: 1000; display: flex;
+            justify-content: center; align-items: center; cursor: pointer;
+        }
+        .init-text {
+            font-size: 1rem; letter-spacing: 0.5rem; color: #555; font-weight: 600;
+            animation: pulseText 2s infinite; text-transform: uppercase;
+        }
+        @keyframes pulseText { 0%, 100% { opacity: 0.3; } 50% { opacity: 1; } }
+
+        /* --- КУРСОР --- */
+        .trail-drop {
+            position: fixed; color: var(--flesh-red); font-size: 10px;
+            pointer-events: none; z-index: 999;
+            animation: fadeDrop 1.5s forwards; mix-blend-mode: screen;
+        }
+        @keyframes fadeDrop { 0% { opacity: 1; transform: scale(1); } 100% { opacity: 0; transform: scale(3) translateY(20px); } }
+
+        /* --- ОСНОВНЫЕ БЛОКИ --- */
+        .section {
+            min-height: 100vh; display: flex; flex-direction: column;
+            align-items: center; justify-content: center; position: relative; z-index: 10;
+            padding: 4rem 2rem; box-sizing: border-box;
+        }
+
+        /* --- ФОНОВОЕ ВИДЕО --- */
+        .top-section { position: relative; overflow: hidden; }
+        #bg-video {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            object-fit: cover; z-index: 1; opacity: 0.4; filter: grayscale(100%) contrast(120%);
+        }
+        .video-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.2) 0%, var(--bg-color) 100%);
+            z-index: 2;
+        }
+        #dynamic-bg {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-size: cover; background-position: center;
+            opacity: 0; transition: opacity 0.1s; z-index: 5; pointer-events: none;
+            mix-blend-mode: exclusion;
+        }
+
+        /* --- ЦЕНТРАЛЬНЫЙ БЛОК --- */
+        .content-wrapper { display: flex; flex-direction: column; align-items: center; z-index: 10; position: relative; }
+        .om-logo { font-size: 10rem; color: var(--bg-color); text-shadow: 0 0 20px var(--flesh-red); filter: url(#flesh-distort); animation: breathe 4s infinite alternate; user-select: none; }
+        @keyframes breathe { 0% { transform: scale(0.95); opacity: 0.8; } 100% { transform: scale(1.05); text-shadow: 0 0 50px #ff0000; } }
+        .brand { font-size: 4rem; font-weight: 900; letter-spacing: 0.5rem; margin: 0; mix-blend-mode: exclusion; text-align: center; }
+        .manifesto { margin-top: 2rem; letter-spacing: 0.2rem; font-weight: 600; color: #888; text-align: center; max-width: 600px; text-shadow: 0 0 5px #000; }
+
+        /* --- РОСТЕР --- */
+        .roster-title { font-size: 1rem; letter-spacing: 1rem; font-weight: 600; color: var(--flesh-red); margin-bottom: 3rem; text-transform: uppercase; text-align: center;}
+        .roster-list { list-style: none; padding: 0; text-align: center; width: 100%; margin-bottom: 2rem; }
+        .roster-item {
+            font-size: 4rem; font-weight: 900; text-transform: uppercase;
+            color: transparent; -webkit-text-stroke: 1px #444; margin: -10px 0;
+            cursor: crosshair; transition: 0.1s; position: relative; z-index: 20;
+        }
+        .roster-item:hover { color: #fff; -webkit-text-stroke: 0px; transform: scale(1.05) skewX(-5deg); text-shadow: 5px 0px 0px var(--flesh-red); }
+
+        /* --- РИТУАЛЫ (EVENTS) --- */
+        .events-container { width: 100%; max-width: 800px; display: flex; flex-direction: column; gap: 1rem; }
+        .event-item {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 1.5rem 0; border-bottom: 1px solid #222;
+            font-size: 1rem; font-weight: 600; letter-spacing: 0.2rem; text-transform: uppercase; transition: 0.3s;
+        }
+        .event-item:hover { color: #fff; border-bottom-color: var(--flesh-red); transform: translateX(10px); }
+        .event-date { color: #777; width: 120px; }
+        .event-city { font-weight: 900; width: 150px; }
+        .event-venue { flex-grow: 1; color: #aaa; }
+        .sold-out { text-decoration: line-through; color: var(--flesh-red); font-weight: 900; }
+
+        /* --- МЕРЧ --- */
+        .merch-grid { display: flex; gap: 4rem; justify-content: center; flex-wrap: wrap; margin-bottom: 2rem; }
+        .merch-item { text-align: center; position: relative; font-weight: 600; letter-spacing: 0.1rem; }
+        .merch-img-placeholder { width: 250px; height: 350px; border: 1px solid #333; display: flex; align-items: center; justify-content: center; color: #333; margin-bottom: 1rem; filter: grayscale(100%); transition: 0.3s;}
+        .merch-item:hover .merch-img-placeholder { filter: grayscale(0%) invert(1); }
+        
+        /* --- КНОПКИ --- */
+        .btn {
+            display: inline-block; margin-top: 2rem; padding: 15px 40px; background: transparent; color: var(--text-color);
+            border: 1px solid var(--text-color); font-size: 0.8rem; font-weight: 600; letter-spacing: 0.3rem; text-transform: uppercase;
+            cursor: pointer; transition: all 0.2s; z-index: 20; text-align: center;
+        }
+        .btn:hover { background: var(--text-color); color: var(--bg-color); }
+        .btn-small { padding: 8px 20px; font-size: 0.7rem; margin-top: 0; }
+
+        /* --- ПОДВАЛ (CONTACTS & DEMO) --- */
+        .footer {
+            width: 100%; border-top: 1px solid #111; padding: 4rem 2rem;
+            display: flex; justify-content: space-around; flex-wrap: wrap; gap: 2rem;
+            background: #010101; box-sizing: border-box; position: relative; z-index: 10;
+        }
+        .footer-col { display: flex; flex-direction: column; gap: 1rem; }
+        .footer-title { font-size: 0.8rem; font-weight: 900; color: var(--flesh-red); letter-spacing: 0.3rem; margin-bottom: 1rem; }
+        .demo-text { font-size: 0.8rem; font-weight: 400; color: #666; max-width: 300px; line-height: 1.6; letter-spacing: 0.05rem; }
+
+        /* --- ТЕРМИНАЛ (ARG) --- */
+        #terminal {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(0,0,0,0.95); z-index: 2000; display: none;
+            flex-direction: column; justify-content: center; align-items: center;
+            font-family: monospace; color: var(--accent);
+        }
+        #term-input {
+            background: transparent; border: none; border-bottom: 1px solid var(--accent);
+            color: #fff; font-size: 2rem; text-align: center; outline: none; text-transform: uppercase;
+            font-family: monospace; width: 300px; letter-spacing: 0.5rem; margin-top: 2rem;
         }
     </style>
 </head>
 <body>
 
+    <!-- ЭМБИЕНТ -->
     <audio id="ender-audio" src="ender_ambient.mp3" loop></audio>
 
     <svg style="display: none;">
         <defs>
             <filter id="flesh-distort">
-                <feTurbulence type="fractalNoise" baseFrequency="0.01 0.1" numOctaves="3" result="warp" id="noise-anim"/>
-                <feDisplacementMap in="SourceGraphic" in2="warp" scale="25" xChannelSelector="R" yChannelSelector="G"/>
+                <feTurbulence type="fractalNoise" baseFrequency="0.01 0.15" numOctaves="3" result="warp" id="noise-anim"/>
+                <feDisplacementMap in="SourceGraphic" in2="warp" scale="30" xChannelSelector="R" yChannelSelector="G"/>
             </filter>
         </defs>
     </svg>
 
     <div id="init-screen" onclick="initExperience()">
-        <div class="init-text">СЛИЯНИЕ (КЛИК)</div>
+        <div class="init-text">Разрешить симбиоз (Клик)</div>
     </div>
 
-    <!-- СМОТРЯЩИЕ (Канвас-глаза) -->
-    <canvas id="watchers-canvas"></canvas>
+    <!-- ВЕРХНЕЕ МЕНЮ (СЛЕВА В СТОЛБЕЦ) -->
+    <nav class="navbar">
+        <a href="about.html" class="nav-link">О ЛЕЙБЛЕ</a>
+        <a href="artists.html" class="nav-link">АРТИСТЫ</a>
+        <a href="merch.html" class="nav-link">МЕРЧ</a>
+        <a href="#footer" class="nav-link">СВЯЗЬ / DEMO</a>
+    </nav>
 
-    <!-- РАЗРУШЕННАЯ НАВИГАЦИЯ ПО КРАЯМ -->
-    <div class="edge-nav nav-top" onclick="openOverlay('about')">[ О ЛЕЙБЛЕ ]</div>
-    <div class="edge-nav nav-bottom" onclick="openOverlay('demo')">[ АССИМИЛЯЦИЯ / СВЯЗЬ ]</div>
-    <div class="edge-nav nav-left" onclick="openOverlay('artists')">[ СИМБИОНТЫ ]</div>
-    <div class="edge-nav nav-right" onclick="openOverlay('merch')">[ АРТЕФАКТЫ ]</div>
+    <div id="dynamic-bg"></div>
 
-    <!-- ЖИВОЕ СЕРДЦЕ -->
-    <div class="monolith-container">
-        <div class="om-core" id="core-entity">ॐ</div>
-        <div class="core-text">OVERLOUD</div>
-        <div style="color: #444; font-size: 0.6rem; margin-top: 2rem; cursor: crosshair;" onclick="openOverlay('arg')">ENTER_FLAT</div>
-    </div>
-
-    <!-- === ОКНА ДАННЫХ (OVERLAYS) === -->
-    
-    <!-- 1. О ЛЕЙБЛЕ -->
-    <div id="about" class="overlay">
-        <div class="crt-scanline"></div>
-        <div class="overlay-content">
-            <button class="close-btn" onclick="closeOverlay()">[X]</button>
-            <h2 class="overlay-title">МАНИФЕСТ</h2>
-            <p>ПЛОТЬ ДЫШИТ. ПРИЧИНЫ НЕТ. СЛЕДСТВИЯ НЕТ. МЫ СМОТРИМ.</p>
-            <p>Зародившись в 2018 году в искажениях звука, OVERLOUD отвергает стерильность. Мы ищем сбои в пространстве. Дисторшн — наш язык. Симбиоз — наша цель.</p>
+    <!-- СЕКЦИЯ 1: ЦЕНТР КУЛЬТА (С ФОНОВЫМ ВИДЕО) -->
+    <div class="section top-section">
+        <video id="bg-video" src="bg_video.mp4" autoplay loop muted playsinline></video>
+        <div class="video-overlay"></div>
+        
+        <div class="content-wrapper">
+            <div class="om-logo">ॐ</div>
+            <h1 class="brand">ОВЕРЛАУД</h1>
+            <div class="manifesto" id="scramble-text">
+                ПЛОТЬ ДЫШИТ. ПРИЧИНЫ НЕТ. СЛЕДСТВИЯ НЕТ. МЫ СМОТРИМ.
+            </div>
+            <button class="btn" onclick="openTerminal()">Вход в квартиру (ARG)</button>
         </div>
     </div>
 
-    <!-- 2. АРТИСТЫ -->
-    <div id="artists" class="overlay">
-        <div class="crt-scanline"></div>
-        <div class="overlay-content">
-            <button class="close-btn" onclick="closeOverlay()">[X]</button>
-            <h2 class="overlay-title">СИМБИОНТЫ</h2>
-            <div class="roster-grid">
-                <div class="roster-item">
-                    <h3>ТВОЙ НИКНЕЙМ</h3>
-                    <p>EXPERIMENTAL / NOISE</p>
+    <!-- СЕКЦИЯ 2: РОСТЕР -->
+    <div class="section">
+        <div class="roster-title">СИМБИОНТЫ</div>
+        <ul class="roster-list">
+            <li class="roster-item" data-bg="artist1.gif" data-audio="noise_burst.mp3">ТВОЙ НИКНЕЙМ</li>
+            <li class="roster-item" data-bg="artist2.gif" data-audio="noise_burst.mp3">АРТИСТ 2</li>
+            <li class="roster-item" data-bg="" data-audio="">АРТИСТ 3</li>
+        </ul>
+        <a href="artists.html" class="btn">ВСЕ АРТИСТЫ</a>
+    </div>
+
+    <div id="void-zone">
+        <!-- СЕКЦИЯ 3: РИТУАЛЫ (EVENTS) -->
+        <div class="section" style="min-height: auto; padding-top: 2rem;">
+            <div class="roster-title">МАТЕРИАЛИЗАЦИЯ: РИТУАЛЫ</div>
+            <div class="events-container">
+                <div class="event-item">
+                    <span class="event-date">24.11.24</span>
+                    <span class="event-city">MOSCOW</span>
+                    <span class="event-venue">SECRET FLAT</span>
+                    <span class="sold-out">ИЗЪЯТО</span>
                 </div>
-                <div class="roster-item">
-                    <h3>ARTIST_02</h3>
-                    <p>DARK WAVE / WITCH HOUSE</p>
-                </div>
-                <div class="roster-item">
-                    <h3>ARTIST_03</h3>
-                    <p>INDUSTRIAL BASS</p>
+                <div class="event-item">
+                    <span class="event-date">13.12.24</span>
+                    <span class="event-city">SAINT-P</span>
+                    <span class="event-venue">BLANK</span>
+                    <a href="#" class="btn btn-small">БИЛЕТЫ</a>
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- 3. МЕРЧ -->
-    <div id="merch" class="overlay">
-        <div class="crt-scanline"></div>
-        <div class="overlay-content">
-            <button class="close-btn" onclick="closeOverlay()">[X]</button>
-            <h2 class="overlay-title">МАТЕРИАЛИЗАЦИЯ (МЕРЧ)</h2>
-            <div class="merch-list">
+        <!-- СЕКЦИЯ 4: МЕРЧ -->
+        <div class="section" style="min-height: auto; padding-bottom: 6rem;">
+            <div class="roster-title">МАТЕРИАЛИЗАЦИЯ: АРТЕФАКТЫ</div>
+            <div class="merch-grid">
                 <div class="merch-item">
-                    <div class="merch-box">[КАССЕТА]</div>
-                    <h4 style="margin: 0 0 10px 0; color: #555; text-decoration: line-through;">REVIVAL TAPE</h4>
-                    <span style="color: var(--flesh); font-size: 0.8rem;">ИЗЪЯТО</span>
+                    <div class="merch-img-placeholder">[ИЗОБРАЖЕНИЕ]</div>
+                    <div class="sold-out">КАССЕТА ОВЕРЛАУД</div>
+                    <div style="color: var(--flesh-red); margin-top: 10px;">SOLD OUT</div>
                 </div>
                 <div class="merch-item">
-                    <div class="merch-box">[ФУТБОЛКА]</div>
-                    <h4 style="margin: 0 0 10px 0;">СИМБИОЗ</h4>
-                    <a href="mailto:om@owerloud.com" class="btn">ЗАКАЗАТЬ</a>
+                    <div class="merch-img-placeholder">[ИЗОБРАЖЕНИЕ]</div>
+                    <div>ФУТБОЛКА "СИМБИОЗ"</div>
+                    <a href="merch.html" class="btn btn-small" style="margin-top: 15px;">ЗАКАЗАТЬ</a>
                 </div>
             </div>
+            <a href="merch.html" class="btn">ВЕСЬ МЕРЧ</a>
         </div>
+
+        <!-- ПОДВАЛ (FOOTER: CONTACTS & DEMO) -->
+        <footer id="footer" class="footer">
+            <div class="footer-col">
+                <div class="footer-title">СВЯЗЬ</div>
+                <a href="mailto:om@owerloud.com" class="nav-link" style="pointer-events: auto;">OM@OWERLOUD.COM</a>
+                <a href="#" class="nav-link" style="pointer-events: auto;">TELEGRAM CHANNEL</a>
+                <a href="#" class="nav-link" style="pointer-events: auto;">VKONTAKTE</a>
+                <a href="#" class="nav-link" style="pointer-events: auto;">SOUNDCLOUD</a>
+            </div>
+            
+            <div class="footer-col">
+                <div class="footer-title">АССИМИЛЯЦИЯ (DEMO DROP)</div>
+                <p class="demo-text">
+                    Пришлите приватную ссылку на Soundcloud. Расскажите о себе. <br><br>
+                    <span style="color: var(--flesh-red); font-weight: bold;">ВАЖНО:</span> Не прикрепляйте mp3 файлы к письму. Плоть должна быть чистой.
+                </p>
+                <a href="mailto:om@owerloud.com?subject=OVERLOUD%20DEMO%20DROP" class="btn btn-small" style="text-align: left; width: fit-content; margin-top: 0;">ОТПРАВИТЬ ПЛОТЬ</a>
+            </div>
+        </footer>
     </div>
 
-    <!-- 4. DEMO / СВЯЗЬ -->
-    <div id="demo" class="overlay">
-        <div class="crt-scanline"></div>
-        <div class="overlay-content">
-            <button class="close-btn" onclick="closeOverlay()">[X]</button>
-            <h2 class="overlay-title">СВЯЗЬ И АССИМИЛЯЦИЯ</h2>
-            <p>Почта: <a href="mailto:om@owerloud.com" style="color: var(--text); border-bottom: 1px solid var(--flesh);">OM@OWERLOUD.COM</a></p>
-            <p style="color: #666; margin-top: 2rem;">Для передачи демо-записей пришлите приватную ссылку на Soundcloud. <br><span style="color: var(--flesh);">Не прикрепляйте mp3 к письму. Плоть должна быть чистой.</span></p>
-            <a href="mailto:om@owerloud.com?subject=OVERLOUD%20DEMO%20DROP" class="btn" style="margin-top: 1rem;">ОТПРАВИТЬ ПЛОТЬ</a>
-        </div>
+    <!-- ТЕРМИНАЛ ЗАГАДКА -->
+    <div id="terminal">
+        <div>ТРЕБУЕТСЯ КЛЮЧ ДОСТУПА. СЛУШАЙ ВНИМАТЕЛЬНО.</div>
+        <input type="text" id="term-input" autocomplete="off" spellcheck="false">
+        <div id="term-error" style="color: var(--accent); margin-top: 20px; opacity: 0;">ОШИБКА. ПЛОТЬ ОТТОРГНУТА.</div>
+        <button class="btn" onclick="closeTerminal()" style="margin-top: 50px; font-size: 0.6rem; border: none;">[Х] ПРЕРВАТЬ</button>
     </div>
 
-    <!-- 5. ARG ТЕРМИНАЛ -->
-    <div id="arg" class="overlay">
-        <div class="crt-scanline"></div>
-        <div class="overlay-content" style="text-align: center; border-color: #ff0000; background: rgba(10,0,0,0.9);">
-            <button class="close-btn" onclick="closeOverlay()">[X]</button>
-            <p style="color: #ff0000;">ТРЕБУЕТСЯ КЛЮЧ ДОСТУПА. СЛУШАЙ ВНИМАТЕЛЬНО.</p>
-            <input type="text" id="term-input" autocomplete="off" spellcheck="false">
-            <p id="term-error" style="color: #ff0000; opacity: 0;">ОШИБКА. ПЛОТЬ ОТТОРГНУТА.</p>
-        </div>
-    </div>
-
+    <!-- СКРИПТЫ (ЗВУК, СКРОЛЛ, ГЛИТЧИ) -->
     <script>
         let audioCtx, osc, gainNode, distortionNode;
         const enderAudio = document.getElementById('ender-audio');
         let isInitiated = false;
-        let activeOverlay = null;
 
-        // Плавный фейд аудио
-        function fadeAudio(audioElement, targetVolume) {
-            if (audioElement.fadeInterval) clearInterval(audioElement.fadeInterval);
-            audioElement.fadeInterval = setInterval(() => {
-                if (Math.abs(audioElement.volume - targetVolume) < 0.05) {
-                    audioElement.volume = targetVolume;
-                    clearInterval(audioElement.fadeInterval);
-                } else if (audioElement.volume < targetVolume) {
-                    audioElement.volume = Math.min(1, audioElement.volume + 0.05);
-                } else {
-                    audioElement.volume = Math.max(0, audioElement.volume - 0.05);
-                }
-            }, 50);
-        }
+        const MAX_AMBIENT_VOL = 0.4; 
+        const MAX_DRONE_VOL = 0.05;  
 
-        // 1. ИНИЦИАЛИЗАЦИЯ
         async function initExperience() {
             document.getElementById('init-screen').style.display = 'none';
             isInitiated = true;
             
+            // Стартуем беззвучно
             enderAudio.volume = 0;
-            enderAudio.play().catch(e => console.error(e));
+            enderAudio.play().catch(e => console.error("Ошибка аудио:", e));
 
             audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             osc = audioCtx.createOscillator();
@@ -282,146 +322,150 @@
             distortionNode = audioCtx.createWaveShaper();
 
             osc.type = 'triangle';
-            osc.frequency.setValueAtTime(45, audioCtx.currentTime); // Низкий, зловещий гул
+            osc.frequency.setValueAtTime(55, audioCtx.currentTime); 
             
             distortionNode.curve = makeDistortionCurve(0);
             distortionNode.oversample = '4x';
-            gainNode.gain.setValueAtTime(0.05, audioCtx.currentTime); 
+            gainNode.gain.setValueAtTime(MAX_DRONE_VOL, audioCtx.currentTime); 
 
             osc.connect(distortionNode);
             distortionNode.connect(gainNode);
             gainNode.connect(audioCtx.destination);
             osc.start();
 
-            initWatchers(); // Запуск глаз на фоне
+            // Применяем громкость первый раз после клика
+            updateAudioVolumes();
         }
+
+        // НАДЕЖНЫЙ ПРОСЧЕТ СКРОЛЛА
+        function updateAudioVolumes() {
+            if (!isInitiated) return;
+
+            if (document.getElementById('terminal').style.display === 'flex') {
+                enderAudio.volume = MAX_AMBIENT_VOL;
+                if (gainNode) gainNode.gain.setTargetAtTime(0, audioCtx.currentTime, 0.1);
+                return;
+            }
+
+            // Получаем точные данные о скролле
+            let scrollTop = window.scrollY || document.documentElement.scrollTop;
+            
+            // Получаем РЕАЛЬНУЮ высоту всего документа
+            let docHeight = Math.max(
+                document.body.scrollHeight, document.documentElement.scrollHeight,
+                document.body.offsetHeight, document.documentElement.offsetHeight,
+                document.body.clientHeight, document.documentElement.clientHeight
+            ) - window.innerHeight;
+
+            let scrollPercent = 0;
+            if (docHeight > 0) {
+                scrollPercent = scrollTop / docHeight;
+            }
+            
+            // Ограничиваем от 0 до 1
+            scrollPercent = Math.max(0, Math.min(1, scrollPercent));
+
+            // Эмбиент: тихий вверху (0), громкий внизу
+            enderAudio.volume = scrollPercent * MAX_AMBIENT_VOL;
+
+            // Шум: громкий вверху, тихий внизу
+            if (gainNode) {
+                let currentDroneVol = MAX_DRONE_VOL * (1 - scrollPercent);
+                currentDroneVol = Math.max(0.002, currentDroneVol); // Чтобы совсем не пропадал
+                gainNode.gain.setTargetAtTime(currentDroneVol, audioCtx.currentTime, 0.1);
+            }
+        }
+
+        window.addEventListener('scroll', updateAudioVolumes);
 
         function makeDistortionCurve(amount) {
             let k = typeof amount === 'number' ? amount : 50, n_samples = 44100, curve = new Float32Array(n_samples);
-            for (let i = 0; i < n_samples; ++i ) { let x = i * 2 / n_samples - 1; curve[i] = ( 3 + k ) * x * 20 * ( Math.PI / 180 ) / ( Math.PI + k * Math.abs(x) ); }
+            for (let i = 0; i < n_samples; ++i ) {
+                let x = i * 2 / n_samples - 1;
+                curve[i] = ( 3 + k ) * x * 20 * ( Math.PI / 180 ) / ( Math.PI + k * Math.abs(x) );
+            }
             return curve;
         }
 
-        // Взаимодействие со звуком и плотью
-        let mouseX = window.innerWidth / 2;
-        let mouseY = window.innerHeight / 2;
-        const filterNoise = document.getElementById('noise-anim');
-        
+        const glitchChars = 'АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ!@#$%^&*()';
         document.addEventListener('mousemove', (e) => {
-            mouseX = e.clientX; mouseY = e.clientY;
-            if (audioCtx && distortionNode && !activeOverlay) {
+            if (audioCtx && distortionNode && gainNode.gain.value > 0.01) {
                 let speed = Math.abs(e.movementX) + Math.abs(e.movementY);
-                distortionNode.curve = makeDistortionCurve(Math.min(speed * 3, 500));
+                distortionNode.curve = makeDistortionCurve(Math.min(speed * 2, 400));
+            }
+            if (Math.random() > 0.5) {
+                let drop = document.createElement('div');
+                drop.classList.add('trail-drop');
+                drop.innerText = glitchChars[Math.floor(Math.random() * glitchChars.length)];
+                drop.style.left = e.clientX + (Math.random() * 20 - 10) + 'px';
+                drop.style.top = e.clientY + (Math.random() * 20 - 10) + 'px';
+                document.body.appendChild(drop);
+                setTimeout(() => drop.remove(), 1500);
             }
         });
 
-        // Анимация центра (дыхание плоти)
+        const filterNoise = document.getElementById('noise-anim');
         let phase = 0;
-        const coreEntity = document.getElementById('core-entity');
-        
-        // Если навести мышь на центр - плоть сходит с ума
-        coreEntity.addEventListener('mouseenter', () => { if(gainNode) gainNode.gain.setTargetAtTime(0.1, audioCtx.currentTime, 0.1); });
-        coreEntity.addEventListener('mouseleave', () => { if(gainNode) gainNode.gain.setTargetAtTime(0.05, audioCtx.currentTime, 0.5); });
-
-        function animateFlesh() { 
-            phase += 0.03; 
-            // Искажение зависит от того, наведена ли мышь на центр
-            let intensity = coreEntity.matches(':hover') ? 0.3 : 0.05;
-            filterNoise.setAttribute('baseFrequency', `0.02 ${intensity + Math.sin(phase) * 0.02}`); 
-            requestAnimationFrame(animateFlesh); 
-        }
+        function animateFlesh() { phase += 0.05; filterNoise.setAttribute('baseFrequency', `0.01 ${0.1 + Math.sin(phase) * 0.05}`); requestAnimationFrame(animateFlesh); }
         animateFlesh();
 
-        // 2. СМОТРЯЩИЕ ЗА ТОБОЙ (Логика Canvas)
-        function initWatchers() {
-            const canvas = document.getElementById('watchers-canvas');
-            const ctx = canvas.getContext('2d');
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-
-            const eyes = [];
-            const spacing = 50; // Расстояние между глазами
-            
-            for (let x = 0; x < canvas.width; x += spacing) {
-                for (let y = 0; y < canvas.height; y += spacing) {
-                    // Глаза появляются со случайным смещением
-                    eyes.push({ x: x + Math.random() * 20, y: y + Math.random() * 20 });
+        const textElement = document.getElementById('scramble-text');
+        const originalText = textElement.innerText;
+        function glitchText() {
+            if (Math.random() > 0.9) {
+                let currentText = originalText.split('');
+                let breaks = Math.floor(Math.random() * 4) + 2; 
+                for(let i=0; i<breaks; i++) {
+                    let idx = Math.floor(Math.random() * currentText.length);
+                    if(currentText[idx] !== ' ') currentText[idx] = glitchChars[Math.floor(Math.random() * glitchChars.length)];
                 }
-            }
+                textElement.innerText = currentText.join('');
+            } else textElement.innerText = originalText;
+            setTimeout(glitchText, Math.random() * 200 + 50);
+        }
+        glitchText();
 
-            function drawWatchers() {
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                
-                eyes.forEach(eye => {
-                    const dx = mouseX - eye.x;
-                    const dy = mouseY - eye.y;
-                    const distance = Math.sqrt(dx * dx + dy * dy);
-                    
-                    // Рисуем точку только если она относительно близко к курсору (эффект фонарика во тьме)
-                    if (distance < 300) {
-                        const angle = Math.atan2(dy, dx);
-                        const intensity = 1 - (distance / 300);
-                        
-                        // "Зрачок" смещается в сторону курсора
-                        const pupilX = eye.x + Math.cos(angle) * 3;
-                        const pupilY = eye.y + Math.sin(angle) * 3;
-
-                        ctx.fillStyle = `rgba(138, 3, 3, ${intensity * 0.5})`; // Цвет крови
-                        ctx.beginPath();
-                        ctx.arc(pupilX, pupilY, 2, 0, Math.PI * 2);
-                        ctx.fill();
-                    }
-                });
-                requestAnimationFrame(drawWatchers);
-            }
-            drawWatchers();
-
-            window.addEventListener('resize', () => {
-                canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+        const rosterItems = document.querySelectorAll('.roster-item');
+        const dynamicBg = document.getElementById('dynamic-bg');
+        let hoverAudio = new Audio();
+        rosterItems.forEach(item => {
+            item.addEventListener('mouseenter', () => {
+                const bgPath = item.getAttribute('data-bg'); if(bgPath) { dynamicBg.style.backgroundImage = `url(${bgPath})`; dynamicBg.style.opacity = 1; }
+                const audioPath = item.getAttribute('data-audio'); if(audioPath) { hoverAudio.src = audioPath; hoverAudio.volume = 0.5; hoverAudio.play().catch(e=>{}); }
+                document.body.style.filter = "invert(1) hue-rotate(180deg)";
             });
+            item.addEventListener('mouseleave', () => {
+                dynamicBg.style.opacity = 0; hoverAudio.pause(); hoverAudio.currentTime = 0; document.body.style.filter = "none";
+            });
+        });
+
+        const terminal = document.getElementById('terminal');
+        const termInput = document.getElementById('term-input');
+        const termError = document.getElementById('term-error');
+
+        function openTerminal() {
+            terminal.style.display = 'flex';
+            setTimeout(() => termInput.focus(), 100);
+            updateAudioVolumes(); 
         }
 
-        // 3. ОТКРЫТИЕ/ЗАКРЫТИЕ ОКОН (OVERLAYS) И ЗВУК
-        function openOverlay(id) {
-            activeOverlay = id;
-            const el = document.getElementById(id);
-            el.style.display = 'flex';
-            setTimeout(() => { el.style.opacity = 1; }, 10);
-
-            // Переключение звука: отключаем дисторшн, включаем Эмбиент из Майнкрафта
-            if(gainNode) gainNode.gain.setTargetAtTime(0, audioCtx.currentTime, 0.5);
-            fadeAudio(enderAudio, 0.6);
-
-            if(id === 'arg') document.getElementById('term-input').focus();
+        function closeTerminal() {
+            terminal.style.display = 'none';
+            termInput.value = '';
+            termError.style.opacity = 0;
+            updateAudioVolumes(); 
         }
 
-        function closeOverlay() {
-            if(!activeOverlay) return;
-            const el = document.getElementById(activeOverlay);
-            el.style.opacity = 0;
-            setTimeout(() => { el.style.display = 'none'; activeOverlay = null; }, 500);
-
-            // Возвращаем дисторшн, глушим Эмбиент
-            if(gainNode) gainNode.gain.setTargetAtTime(0.05, audioCtx.currentTime, 0.5);
-            fadeAudio(enderAudio, 0);
-            
-            document.getElementById('term-input').value = '';
-            document.getElementById('term-error').style.opacity = 0;
-        }
-
-        // Логика ARG Терминала
-        document.getElementById('term-input').addEventListener('keydown', (e) => {
+        termInput.addEventListener('keydown', (e) => {
             if (e.key === 'Enter') {
-                const password = e.target.value.toUpperCase().trim();
+                const password = termInput.value.toUpperCase().trim();
                 if (password === 'СИМБИОЗ' || password === 'ENTER') { 
-                    e.target.style.color = "#00ff00"; e.target.value = "ДОСТУП РАЗРЕШЕН...";
+                    termInput.style.color = "#00ff00"; termInput.value = "ДОСТУП РАЗРЕШЕН...";
                     setTimeout(() => { window.location.href = "https://t.me/your_secret_channel"; }, 1500);
                 } else {
-                    const err = document.getElementById('term-error');
-                    err.style.opacity = 1; 
-                    document.getElementById('arg').querySelector('.overlay-content').style.transform = "translate(10px, -10px)";
-                    setTimeout(() => document.getElementById('arg').querySelector('.overlay-content').style.transform = "none", 100);
-                    e.target.value = '';
+                    termError.style.opacity = 1; document.body.style.transform = "translate(10px, -10px)";
+                    setTimeout(() => document.body.style.transform = "none", 100);
+                    termInput.value = '';
                 }
             }
         });
