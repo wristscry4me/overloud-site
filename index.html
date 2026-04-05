@@ -3,329 +3,278 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ОВЕРЛАУД | OVERLOUD</title>
+    <title>OVERLOUD | ОВЕРЛАУД</title>
     
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <!-- Inter для заголовков, Space Mono для "машинного/терминального" текста -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;900&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
 
     <style>
-        /* --- НОВАЯ ПАЛИТРА (Ржавчина, Уголь, Кость) --- */
         :root {
-            --bg-color: #070706; /* Почти черный, цвет угля/смолы */
-            --text-color: #dcdcd2; /* Цвет старой бумаги/кости */
-            --flesh-rust: #b34512; /* Жженый шафран / Засохшая кровь */
-            --border-color: #1f1f1d; /* Цвет тонких сеток */
+            --bg: #020202;
+            --flesh: #8a0303;
+            --text: #dcdcd2;
+            --glitch: #ff0000;
         }
 
         body, html {
-            margin: 0; padding: 0; width: 100%; 
-            background-color: var(--bg-color); color: var(--text-color);
-            font-family: 'Inter', sans-serif;
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
-            overflow-x: hidden; cursor: crosshair;
+            margin: 0; padding: 0; width: 100vw; height: 100vh;
+            background-color: var(--bg); color: var(--text);
+            font-family: 'Space Mono', monospace;
+            overflow: hidden; /* Запрещаем скролл. Выхода нет. */
+            cursor: crosshair; user-select: none;
         }
 
-        a { text-decoration: none; color: inherit; cursor: crosshair; }
-        
-        /* Технический моноширинный шрифт для мелких деталей */
-        .mono { font-family: 'Space Mono', monospace; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1rem; }
-
-        /* --- СТРУКТУРА: АСИММЕТРИЯ (Левая панель и Правый контент) --- */
-        #sidebar {
-            position: fixed; top: 0; left: 0; 
-            width: 250px; height: 100vh; 
-            border-right: 1px solid var(--border-color);
-            display: flex; flex-direction: column; justify-content: space-between;
-            padding: 3rem 2rem; box-sizing: border-box;
-            background: var(--bg-color); z-index: 100;
-        }
-
-        #main-content {
-            margin-left: 250px; width: calc(100% - 250px);
-            position: relative; z-index: 10;
-        }
-
-        /* --- НАВИГАЦИЯ (В сайдбаре) --- */
-        .nav-links { display: flex; flex-direction: column; gap: 1.5rem; margin-top: 3rem; }
-        .nav-link { font-weight: 600; font-size: 0.8rem; letter-spacing: 0.15rem; transition: 0.3s; width: max-content; }
-        .nav-link:hover { color: var(--flesh-rust); transform: translateX(10px); }
-        
-        .sidebar-logo { font-size: 3rem; color: var(--flesh-rust); filter: url(#flesh-distort); animation: breathe 4s infinite alternate; user-select: none; line-height: 1; }
-        @keyframes breathe { 0% { transform: scale(0.95); opacity: 0.8; } 100% { transform: scale(1.05); filter: drop-shadow(0 0 10px var(--flesh-rust)); } }
-
-        /* --- БЕГУЩАЯ СТРОКА (Манифест) --- */
-        .marquee-container {
-            width: 100%; border-bottom: 1px solid var(--border-color);
-            overflow: hidden; white-space: nowrap; padding: 1rem 0;
-            background: var(--flesh-rust); color: var(--bg-color);
-        }
-        .marquee-text {
-            display: inline-block; font-weight: 900; font-size: 1.2rem; letter-spacing: 0.3rem;
-            animation: marquee 20s linear infinite;
-        }
-        @keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
-
-        /* --- СЕКЦИИ КОНТЕНТА --- */
-        .section {
-            padding: 6rem 4rem; border-bottom: 1px solid var(--border-color);
-            position: relative; box-sizing: border-box;
-        }
-
-        /* --- ГЕРОЙ ЭКРАН (Видео + Заголовок) --- */
-        .hero-section {
-            display: flex; flex-direction: column; justify-content: flex-end;
-            height: 80vh; padding: 4rem; position: relative; overflow: hidden;
-        }
-        #bg-video {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            object-fit: cover; z-index: 1; opacity: 0.3; filter: grayscale(100%) contrast(150%);
-        }
-        .hero-title {
-            font-size: clamp(3rem, 8vw, 8rem); font-weight: 900; letter-spacing: 0.2rem; 
-            margin: 0; z-index: 2; line-height: 0.9; mix-blend-mode: exclusion;
-        }
-
-        /* --- РОСТЕР (Архивный список) --- */
-        .section-header { margin-bottom: 3rem; color: var(--flesh-rust); }
-        
-        .roster-list { display: flex; flex-direction: column; width: 100%; }
-        .roster-item {
-            display: flex; justify-content: space-between; align-items: flex-end;
-            padding: 2rem 0; border-top: 1px solid var(--border-color);
-            cursor: crosshair; transition: 0.3s; position: relative; z-index: 20;
-        }
-        .roster-name { font-size: clamp(2rem, 4vw, 4rem); font-weight: 900; margin: 0; transition: 0.3s; text-transform: uppercase; }
-        .roster-item:hover .roster-name { color: var(--flesh-rust); transform: translateX(20px) skewX(-5deg); }
-        .roster-item:last-child { border-bottom: 1px solid var(--border-color); }
-
-        /* Динамический фон для артистов */
-        #dynamic-bg {
-            position: fixed; top: 0; left: 250px; width: calc(100% - 250px); height: 100vh;
-            background-size: cover; background-position: center;
-            opacity: 0; transition: opacity 0.1s; z-index: 5; pointer-events: none;
-            mix-blend-mode: hard-light; filter: grayscale(100%) sepia(50%) hue-rotate(330deg);
-        }
-
-        /* --- РИТУАЛЫ (EVENTS) --- */
-        .event-item {
-            display: grid; grid-template-columns: 1fr 2fr 1fr auto; align-items: center;
-            padding: 1.5rem 0; border-bottom: 1px dashed #333; transition: 0.3s;
-        }
-        .event-item:hover { background: #0c0c0b; padding-left: 1rem; }
-        .sold-out { text-decoration: line-through; color: var(--flesh-rust); }
-
-        /* --- МЕРЧ (Брутализм) --- */
-        .merch-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 2rem; }
-        .merch-card { border: 1px solid var(--border-color); padding: 2rem; transition: 0.3s; display: flex; flex-direction: column; justify-content: space-between;}
-        .merch-card:hover { border-color: var(--text-color); }
-        .merch-img-box { width: 100%; aspect-ratio: 1/1; background: #0c0c0b; margin-bottom: 2rem; display: flex; align-items: center; justify-content: center; color: #333;}
-        .merch-title { font-size: 1.2rem; font-weight: 900; margin-bottom: 0.5rem; text-transform: uppercase; }
-
-        /* --- КНОПКИ --- */
-        .btn {
-            display: inline-block; padding: 15px 30px; background: transparent; color: var(--text-color);
-            border: 1px solid var(--text-color); font-size: 0.7rem; font-weight: 600; letter-spacing: 0.1rem; 
-            text-transform: uppercase; cursor: pointer; transition: 0.3s; margin-top: 2rem; font-family: 'Space Mono', monospace;
-        }
-        .btn:hover { background: var(--text-color); color: var(--bg-color); }
-
-        /* --- ПОДВАЛ (Сетка) --- */
-        .footer-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; }
-        .footer-col h4 { margin-bottom: 1rem; color: var(--flesh-rust); }
-        .footer-col p { color: #888; line-height: 1.6; max-width: 400px; }
-
-        /* --- ТЕРМИНАЛ (ARG) --- */
-        #terminal {
+        /* --- СМОТРЯЩИЕ (Холст на заднем фоне) --- */
+        #watchers-canvas {
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-            background: rgba(7,7,6,0.98); z-index: 2000; display: none;
+            z-index: 1; pointer-events: none; opacity: 0.6;
+        }
+
+        /* --- ЖИВОЕ СЕРДЦЕ (ОМ) В ЦЕНТРЕ --- */
+        .monolith-container {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            z-index: 10; display: flex; flex-direction: column; align-items: center;
+        }
+        
+        .om-core {
+            font-size: clamp(10rem, 25vw, 20rem); color: var(--bg);
+            text-shadow: 0 0 30px var(--flesh), 0 0 10px #fff;
+            filter: url(#flesh-distort);
+            animation: breathe 5s infinite alternate ease-in-out;
+            transition: text-shadow 0.3s;
+        }
+        .om-core:hover {
+            text-shadow: 0 0 80px var(--glitch), 0 0 20px #fff;
+        }
+        @keyframes breathe {
+            0% { transform: scale(0.95); opacity: 0.8; }
+            100% { transform: scale(1.05); opacity: 1; }
+        }
+
+        .core-text {
+            margin-top: -2rem; font-size: 1.5rem; font-weight: 700; letter-spacing: 1rem;
+            color: var(--flesh); mix-blend-mode: screen; text-align: center;
+        }
+
+        /* --- НАВИГАЦИЯ (Раскидана по краям) --- */
+        .edge-nav {
+            position: absolute; z-index: 20; text-transform: uppercase;
+            font-size: 0.8rem; letter-spacing: 0.3rem; font-weight: 700;
+            color: #555; transition: 0.3s; cursor: crosshair;
+        }
+        .edge-nav:hover { color: var(--text); text-shadow: 0 0 10px var(--flesh); letter-spacing: 0.5rem; }
+
+        .nav-top { top: 2rem; left: 50%; transform: translateX(-50%); }
+        .nav-bottom { bottom: 2rem; left: 50%; transform: translateX(-50%); }
+        .nav-left { left: 2rem; top: 50%; transform: translateY(-50%) rotate(-90deg); }
+        .nav-right { right: 2rem; top: 50%; transform: translateY(-50%) rotate(90deg); }
+
+        /* --- ВСПЛЫВАЮЩИЕ ОКНА (ИНТЕРФЕЙС ТЕРМИНАЛА) --- */
+        .overlay {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(2,2,2,0.95); z-index: 50; display: none;
             flex-direction: column; justify-content: center; align-items: center;
-            color: var(--flesh-rust); font-family: 'Space Mono', monospace;
+            opacity: 0; transition: opacity 0.5s;
         }
-        #term-input {
-            background: transparent; border: none; border-bottom: 1px solid var(--flesh-rust);
-            color: #fff; font-size: 2rem; text-align: center; outline: none; text-transform: uppercase;
-            font-family: monospace; width: 300px; letter-spacing: 0.5rem; margin-top: 2rem;
+        
+        /* Эффект ЭЛТ-монитора для окон */
+        .crt-scanline {
+            position: absolute; top: 0; left: 0; width: 100%; height: 10px;
+            background: rgba(255,0,0,0.1); opacity: 0.4;
+            animation: scan 4s linear infinite; pointer-events: none; z-index: 55;
         }
+        @keyframes scan { 0% { top: -10px; } 100% { top: 100%; } }
 
-        /* --- КУРСОР "КРОВОТОЧАЩИЙ СЛЕД" --- */
-        .trail-drop { position: fixed; color: var(--flesh-rust); font-size: 10px; pointer-events: none; z-index: 999; animation: fadeDrop 1.5s forwards; }
-        @keyframes fadeDrop { 0% { opacity: 1; transform: scale(1); } 100% { opacity: 0; transform: scale(3) translateY(20px); } }
+        .overlay-content {
+            width: 80%; max-width: 800px; max-height: 80vh; overflow-y: auto;
+            border: 1px solid var(--flesh); padding: 3rem; position: relative;
+            background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(138,3,3,0.05) 2px, rgba(138,3,3,0.05) 4px);
+        }
+        
+        /* Скрываем стандартный ползунок скролла внутри окон */
+        .overlay-content::-webkit-scrollbar { width: 5px; }
+        .overlay-content::-webkit-scrollbar-thumb { background: var(--flesh); }
 
-        /* ЭКРАН ИНИЦИАЦИИ */
-        #init-screen { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: var(--bg-color); z-index: 3000; display: flex; justify-content: center; align-items: center; cursor: pointer; }
-        .init-text { font-size: 1rem; letter-spacing: 0.5rem; color: var(--text-color); font-weight: 600; animation: pulseText 2s infinite; text-transform: uppercase; }
+        .close-btn {
+            position: absolute; top: 1rem; right: 1rem; color: var(--flesh);
+            font-size: 1rem; cursor: crosshair; font-weight: 700; border: none; background: transparent;
+        }
+        .close-btn:hover { color: #fff; }
 
-        /* --- АДАПТИВ (Для телефонов) --- */
-        @media (max-width: 900px) {
-            #sidebar { width: 100%; height: auto; position: relative; padding: 2rem; border-right: none; border-bottom: 1px solid var(--border-color); flex-direction: row; align-items: center; }
-            #main-content { margin-left: 0; width: 100%; }
-            .nav-links { flex-direction: row; flex-wrap: wrap; margin-top: 0; gap: 1rem; }
-            .sidebar-logo { font-size: 2rem; }
-            .hero-section { height: 60vh; padding: 2rem; }
-            .section { padding: 4rem 2rem; }
-            .event-item { grid-template-columns: 1fr; gap: 0.5rem; padding: 1rem; }
-            .footer-grid { grid-template-columns: 1fr; }
-            #dynamic-bg { left: 0; width: 100%; }
+        /* --- КОНТЕНТ ВНУТРИ ОКОН --- */
+        h2.overlay-title { font-size: 2rem; color: var(--flesh); margin-top: 0; border-bottom: 1px solid #333; padding-bottom: 1rem; }
+        
+        /* Артисты */
+        .roster-grid { display: flex; flex-direction: column; gap: 2rem; }
+        .roster-item { border-left: 3px solid var(--flesh); padding-left: 1rem; }
+        .roster-item h3 { margin: 0 0 0.5rem 0; font-size: 1.5rem; color: var(--text); }
+        .roster-item p { margin: 0; color: #666; font-size: 0.8rem; }
+        
+        /* Мерч */
+        .merch-list { display: flex; gap: 2rem; overflow-x: auto; padding-bottom: 1rem; }
+        .merch-item { min-width: 200px; border: 1px solid #333; padding: 1rem; text-align: center; }
+        .merch-box { width: 100%; height: 150px; background: #0a0a0a; margin-bottom: 1rem; display: flex; align-items: center; justify-content: center; color: #333;}
+        
+        /* Кнопки */
+        .btn {
+            display: inline-block; padding: 10px 20px; background: transparent; color: var(--text);
+            border: 1px solid var(--flesh); font-size: 0.8rem; text-transform: uppercase; cursor: crosshair; transition: 0.3s;
+        }
+        .btn:hover { background: var(--flesh); color: var(--bg); }
+
+        /* Экран инициации */
+        #init-screen { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: var(--bg); z-index: 3000; display: flex; justify-content: center; align-items: center; cursor: pointer; }
+        .init-text { animation: pulseText 2s infinite; font-size: 1.2rem; }
+
+        /* ARG Терминал */
+        #term-input { background: transparent; border: none; border-bottom: 1px solid var(--flesh); color: #fff; font-size: 2rem; text-align: center; outline: none; font-family: monospace; width: 100%; }
+
+        @media (max-width: 768px) {
+            .nav-left { left: -2rem; } .nav-right { right: -2rem; }
+            .overlay-content { width: 95%; padding: 1.5rem; }
         }
     </style>
 </head>
 <body>
 
-    <!-- ЭМБИЕНТ -->
     <audio id="ender-audio" src="ender_ambient.mp3" loop></audio>
 
     <svg style="display: none;">
         <defs>
             <filter id="flesh-distort">
-                <feTurbulence type="fractalNoise" baseFrequency="0.02 0.1" numOctaves="3" result="warp" id="noise-anim"/>
-                <feDisplacementMap in="SourceGraphic" in2="warp" scale="20" xChannelSelector="R" yChannelSelector="G"/>
+                <feTurbulence type="fractalNoise" baseFrequency="0.01 0.1" numOctaves="3" result="warp" id="noise-anim"/>
+                <feDisplacementMap in="SourceGraphic" in2="warp" scale="25" xChannelSelector="R" yChannelSelector="G"/>
             </filter>
         </defs>
     </svg>
 
     <div id="init-screen" onclick="initExperience()">
-        <div class="init-text mono">ИНИЦИАЛИЗАЦИЯ (КЛИК)</div>
+        <div class="init-text">СЛИЯНИЕ (КЛИК)</div>
     </div>
 
-    <!-- ЛЕВАЯ ПАНЕЛЬ (САЙДБАР) -->
-    <aside id="sidebar">
-        <div class="sidebar-logo">ॐ</div>
-        <nav class="nav-links">
-            <a href="about.html" class="nav-link mono">О ЛЕЙБЛЕ</a>
-            <a href="artists.html" class="nav-link mono">АРТИСТЫ</a>
-            <a href="merch.html" class="nav-link mono">МЕРЧ</a>
-            <a href="#footer" class="nav-link mono">СВЯЗЬ / DEMO</a>
-        </nav>
-        <div class="mono" style="color: #555;">© 2018—2024</div>
-    </aside>
+    <!-- СМОТРЯЩИЕ (Канвас-глаза) -->
+    <canvas id="watchers-canvas"></canvas>
 
-    <div id="dynamic-bg"></div>
+    <!-- РАЗРУШЕННАЯ НАВИГАЦИЯ ПО КРАЯМ -->
+    <div class="edge-nav nav-top" onclick="openOverlay('about')">[ О ЛЕЙБЛЕ ]</div>
+    <div class="edge-nav nav-bottom" onclick="openOverlay('demo')">[ АССИМИЛЯЦИЯ / СВЯЗЬ ]</div>
+    <div class="edge-nav nav-left" onclick="openOverlay('artists')">[ СИМБИОНТЫ ]</div>
+    <div class="edge-nav nav-right" onclick="openOverlay('merch')">[ АРТЕФАКТЫ ]</div>
 
-    <!-- ПРАВАЯ ЧАСТЬ (ОСНОВНОЙ КОНТЕНТ) -->
-    <main id="main-content">
-        
-        <!-- БЕГУЩАЯ СТРОКА -->
-        <div class="marquee-container">
-            <div class="marquee-text" id="scramble-text">
-                ПЛОТЬ ДЫШИТ. ПРИЧИНЫ НЕТ. СЛЕДСТВИЯ НЕТ. МЫ СМОТРИМ. &nbsp; • &nbsp; ПЛОТЬ ДЫШИТ. ПРИЧИНЫ НЕТ. СЛЕДСТВИЯ НЕТ. МЫ СМОТРИМ. &nbsp; • &nbsp; 
-            </div>
-        </div>
-
-        <!-- ГЕРОЙ-СЕКЦИЯ -->
-        <section class="hero-section">
-            <video id="bg-video" src="bg_video.mp4" autoplay loop muted playsinline></video>
-            <h1 class="hero-title">OVERLOUD</h1>
-        </section>
-
-        <!-- РОСТЕР -->
-        <section class="section">
-            <div class="mono section-header">/ СИМБИОНТЫ</div>
-            <div class="roster-list">
-                <div class="roster-item" data-bg="artist1.gif" data-audio="noise_burst.mp3">
-                    <h2 class="roster-name">ТВОЙ НИКНЕЙМ</h2>
-                    <span class="mono" style="color:#666;">EXPERIMENTAL</span>
-                </div>
-                <div class="roster-item" data-bg="artist2.gif" data-audio="noise_burst.mp3">
-                    <h2 class="roster-name">ARTIST_02</h2>
-                    <span class="mono" style="color:#666;">DARK WAVE</span>
-                </div>
-                <div class="roster-item" data-bg="" data-audio="">
-                    <h2 class="roster-name">ARTIST_03</h2>
-                    <span class="mono" style="color:#666;">INDUSTRIAL</span>
-                </div>
-            </div>
-            <a href="artists.html" class="btn">ВСЕ АРТИСТЫ</a>
-        </section>
-
-        <!-- ЗОНА ПУСТОТЫ (ДЛЯ ЭМБИЕНТА) -->
-        <div id="void-zone">
-            
-            <!-- РИТУАЛЫ -->
-            <section class="section">
-                <div class="mono section-header">/ РИТУАЛЫ (EVENTS)</div>
-                <div class="events-container">
-                    <div class="event-item">
-                        <span class="mono" style="color:#888;">24.11.24</span>
-                        <span style="font-weight:900;">MOSCOW</span>
-                        <span style="color:#666;">SECRET FLAT</span>
-                        <span class="sold-out mono">ИЗЪЯТО</span>
-                    </div>
-                    <div class="event-item">
-                        <span class="mono" style="color:#888;">13.12.24</span>
-                        <span style="font-weight:900;">SAINT-P</span>
-                        <span style="color:#666;">BLANK CLUB</span>
-                        <a href="#" class="btn" style="margin-top:0; padding: 10px 20px;">БИЛЕТЫ</a>
-                    </div>
-                </div>
-            </section>
-
-            <!-- МЕРЧ -->
-            <section class="section">
-                <div class="mono section-header">/ АРТЕФАКТЫ (MERCH)</div>
-                <div class="merch-grid">
-                    <div class="merch-card">
-                        <div class="merch-img-box">[ИЗОБРАЖЕНИЕ]</div>
-                        <h3 class="merch-title sold-out">КАССЕТА REVIVAL</h3>
-                        <span class="mono" style="color: var(--flesh-rust);">SOLD OUT</span>
-                    </div>
-                    <div class="merch-card">
-                        <div class="merch-img-box">[ИЗОБРАЖЕНИЕ]</div>
-                        <h3 class="merch-title">ФУТБОЛКА "СИМБИОЗ"</h3>
-                        <a href="merch.html" class="btn" style="margin-top: 1rem; width: 100%; text-align: center; box-sizing: border-box;">МАТЕРИАЛИЗОВАТЬ</a>
-                    </div>
-                </div>
-            </section>
-
-            <!-- ПОДВАЛ -->
-            <footer id="footer" class="section" style="background: #050505;">
-                <div class="footer-grid">
-                    <div class="footer-col">
-                        <h4 class="mono">/ СВЯЗЬ</h4>
-                        <div style="display: flex; flex-direction: column; gap: 0.5rem;">
-                            <a href="mailto:om@owerloud.com" class="nav-link mono" style="color:#aaa;">OM@OWERLOUD.COM</a>
-                            <a href="#" class="nav-link mono" style="color:#aaa;">TELEGRAM</a>
-                            <a href="#" class="nav-link mono" style="color:#aaa;">SOUNDCLOUD</a>
-                        </div>
-                    </div>
-                    <div class="footer-col">
-                        <h4 class="mono">/ АССИМИЛЯЦИЯ (DEMO DROP)</h4>
-                        <p class="mono">Пришлите приватную ссылку на Soundcloud. <br><span style="color: var(--flesh-rust);">Не прикрепляйте mp3 к письму.</span></p>
-                        <a href="mailto:om@owerloud.com?subject=OVERLOUD%20DEMO%20DROP" class="btn">ОТПРАВИТЬ ПЛОТЬ</a>
-                    </div>
-                </div>
-                
-                <button class="btn" onclick="openTerminal()" style="margin-top: 4rem; width: 100%;">ВХОД В КВАРТИРУ (ARG)</button>
-            </footer>
-
-        </div>
-    </main>
-
-    <!-- ТЕРМИНАЛ ЗАГАДКА -->
-    <div id="terminal">
-        <div class="mono">ТРЕБУЕТСЯ КЛЮЧ ДОСТУПА. СЛУШАЙ ВНИМАТЕЛЬНО.</div>
-        <input type="text" id="term-input" autocomplete="off" spellcheck="false">
-        <div id="term-error" style="margin-top: 20px; opacity: 0;" class="mono">ОШИБКА. ПЛОТЬ ОТТОРГНУТА.</div>
-        <button class="btn" onclick="closeTerminal()" style="margin-top: 50px; border-color: #333;">[Х] ПРЕРВАТЬ</button>
+    <!-- ЖИВОЕ СЕРДЦЕ -->
+    <div class="monolith-container">
+        <div class="om-core" id="core-entity">ॐ</div>
+        <div class="core-text">OVERLOUD</div>
+        <div style="color: #444; font-size: 0.6rem; margin-top: 2rem; cursor: crosshair;" onclick="openOverlay('arg')">ENTER_FLAT</div>
     </div>
 
-    <!-- СКРИПТЫ (ЗВУК, СКРОЛЛ, ГЛИТЧИ) -->
+    <!-- === ОКНА ДАННЫХ (OVERLAYS) === -->
+    
+    <!-- 1. О ЛЕЙБЛЕ -->
+    <div id="about" class="overlay">
+        <div class="crt-scanline"></div>
+        <div class="overlay-content">
+            <button class="close-btn" onclick="closeOverlay()">[X]</button>
+            <h2 class="overlay-title">МАНИФЕСТ</h2>
+            <p>ПЛОТЬ ДЫШИТ. ПРИЧИНЫ НЕТ. СЛЕДСТВИЯ НЕТ. МЫ СМОТРИМ.</p>
+            <p>Зародившись в 2018 году в искажениях звука, OVERLOUD отвергает стерильность. Мы ищем сбои в пространстве. Дисторшн — наш язык. Симбиоз — наша цель.</p>
+        </div>
+    </div>
+
+    <!-- 2. АРТИСТЫ -->
+    <div id="artists" class="overlay">
+        <div class="crt-scanline"></div>
+        <div class="overlay-content">
+            <button class="close-btn" onclick="closeOverlay()">[X]</button>
+            <h2 class="overlay-title">СИМБИОНТЫ</h2>
+            <div class="roster-grid">
+                <div class="roster-item">
+                    <h3>ТВОЙ НИКНЕЙМ</h3>
+                    <p>EXPERIMENTAL / NOISE</p>
+                </div>
+                <div class="roster-item">
+                    <h3>ARTIST_02</h3>
+                    <p>DARK WAVE / WITCH HOUSE</p>
+                </div>
+                <div class="roster-item">
+                    <h3>ARTIST_03</h3>
+                    <p>INDUSTRIAL BASS</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. МЕРЧ -->
+    <div id="merch" class="overlay">
+        <div class="crt-scanline"></div>
+        <div class="overlay-content">
+            <button class="close-btn" onclick="closeOverlay()">[X]</button>
+            <h2 class="overlay-title">МАТЕРИАЛИЗАЦИЯ (МЕРЧ)</h2>
+            <div class="merch-list">
+                <div class="merch-item">
+                    <div class="merch-box">[КАССЕТА]</div>
+                    <h4 style="margin: 0 0 10px 0; color: #555; text-decoration: line-through;">REVIVAL TAPE</h4>
+                    <span style="color: var(--flesh); font-size: 0.8rem;">ИЗЪЯТО</span>
+                </div>
+                <div class="merch-item">
+                    <div class="merch-box">[ФУТБОЛКА]</div>
+                    <h4 style="margin: 0 0 10px 0;">СИМБИОЗ</h4>
+                    <a href="mailto:om@owerloud.com" class="btn">ЗАКАЗАТЬ</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 4. DEMO / СВЯЗЬ -->
+    <div id="demo" class="overlay">
+        <div class="crt-scanline"></div>
+        <div class="overlay-content">
+            <button class="close-btn" onclick="closeOverlay()">[X]</button>
+            <h2 class="overlay-title">СВЯЗЬ И АССИМИЛЯЦИЯ</h2>
+            <p>Почта: <a href="mailto:om@owerloud.com" style="color: var(--text); border-bottom: 1px solid var(--flesh);">OM@OWERLOUD.COM</a></p>
+            <p style="color: #666; margin-top: 2rem;">Для передачи демо-записей пришлите приватную ссылку на Soundcloud. <br><span style="color: var(--flesh);">Не прикрепляйте mp3 к письму. Плоть должна быть чистой.</span></p>
+            <a href="mailto:om@owerloud.com?subject=OVERLOUD%20DEMO%20DROP" class="btn" style="margin-top: 1rem;">ОТПРАВИТЬ ПЛОТЬ</a>
+        </div>
+    </div>
+
+    <!-- 5. ARG ТЕРМИНАЛ -->
+    <div id="arg" class="overlay">
+        <div class="crt-scanline"></div>
+        <div class="overlay-content" style="text-align: center; border-color: #ff0000; background: rgba(10,0,0,0.9);">
+            <button class="close-btn" onclick="closeOverlay()">[X]</button>
+            <p style="color: #ff0000;">ТРЕБУЕТСЯ КЛЮЧ ДОСТУПА. СЛУШАЙ ВНИМАТЕЛЬНО.</p>
+            <input type="text" id="term-input" autocomplete="off" spellcheck="false">
+            <p id="term-error" style="color: #ff0000; opacity: 0;">ОШИБКА. ПЛОТЬ ОТТОРГНУТА.</p>
+        </div>
+    </div>
+
     <script>
         let audioCtx, osc, gainNode, distortionNode;
         const enderAudio = document.getElementById('ender-audio');
         let isInitiated = false;
+        let activeOverlay = null;
 
-        const MAX_AMBIENT_VOL = 0.4; 
-        const MAX_DRONE_VOL = 0.05;  
+        // Плавный фейд аудио
+        function fadeAudio(audioElement, targetVolume) {
+            if (audioElement.fadeInterval) clearInterval(audioElement.fadeInterval);
+            audioElement.fadeInterval = setInterval(() => {
+                if (Math.abs(audioElement.volume - targetVolume) < 0.05) {
+                    audioElement.volume = targetVolume;
+                    clearInterval(audioElement.fadeInterval);
+                } else if (audioElement.volume < targetVolume) {
+                    audioElement.volume = Math.min(1, audioElement.volume + 0.05);
+                } else {
+                    audioElement.volume = Math.max(0, audioElement.volume - 0.05);
+                }
+            }, 50);
+        }
 
+        // 1. ИНИЦИАЛИЗАЦИЯ
         async function initExperience() {
             document.getElementById('init-screen').style.display = 'none';
             isInitiated = true;
             
             enderAudio.volume = 0;
-            enderAudio.play().catch(e => console.error("Ошибка аудио:", e));
+            enderAudio.play().catch(e => console.error(e));
 
             audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             osc = audioCtx.createOscillator();
@@ -333,50 +282,19 @@
             distortionNode = audioCtx.createWaveShaper();
 
             osc.type = 'triangle';
-            osc.frequency.setValueAtTime(55, audioCtx.currentTime); 
+            osc.frequency.setValueAtTime(45, audioCtx.currentTime); // Низкий, зловещий гул
             
             distortionNode.curve = makeDistortionCurve(0);
             distortionNode.oversample = '4x';
-            gainNode.gain.setValueAtTime(MAX_DRONE_VOL, audioCtx.currentTime); 
+            gainNode.gain.setValueAtTime(0.05, audioCtx.currentTime); 
 
             osc.connect(distortionNode);
             distortionNode.connect(gainNode);
             gainNode.connect(audioCtx.destination);
             osc.start();
 
-            updateAudioVolumes();
+            initWatchers(); // Запуск глаз на фоне
         }
-
-        function updateAudioVolumes() {
-            if (!isInitiated) return;
-
-            if (document.getElementById('terminal').style.display === 'flex') {
-                enderAudio.volume = MAX_AMBIENT_VOL;
-                if (gainNode) gainNode.gain.setTargetAtTime(0, audioCtx.currentTime, 0.1);
-                return;
-            }
-
-            let scrollTop = window.scrollY || document.documentElement.scrollTop;
-            let docHeight = Math.max(
-                document.body.scrollHeight, document.documentElement.scrollHeight,
-                document.body.offsetHeight, document.documentElement.offsetHeight,
-                document.body.clientHeight, document.documentElement.clientHeight
-            ) - window.innerHeight;
-
-            let scrollPercent = 0;
-            if (docHeight > 0) { scrollPercent = scrollTop / docHeight; }
-            scrollPercent = Math.max(0, Math.min(1, scrollPercent));
-
-            enderAudio.volume = scrollPercent * MAX_AMBIENT_VOL;
-
-            if (gainNode) {
-                let currentDroneVol = MAX_DRONE_VOL * (1 - scrollPercent);
-                currentDroneVol = Math.max(0.002, currentDroneVol); 
-                gainNode.gain.setTargetAtTime(currentDroneVol, audioCtx.currentTime, 0.1);
-            }
-        }
-
-        window.addEventListener('scroll', updateAudioVolumes);
 
         function makeDistortionCurve(amount) {
             let k = typeof amount === 'number' ? amount : 50, n_samples = 44100, curve = new Float32Array(n_samples);
@@ -384,74 +302,126 @@
             return curve;
         }
 
-        const glitchChars = 'АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ!@#$%^&*()';
+        // Взаимодействие со звуком и плотью
+        let mouseX = window.innerWidth / 2;
+        let mouseY = window.innerHeight / 2;
+        const filterNoise = document.getElementById('noise-anim');
+        
         document.addEventListener('mousemove', (e) => {
-            if (audioCtx && distortionNode && gainNode.gain.value > 0.01) {
+            mouseX = e.clientX; mouseY = e.clientY;
+            if (audioCtx && distortionNode && !activeOverlay) {
                 let speed = Math.abs(e.movementX) + Math.abs(e.movementY);
-                distortionNode.curve = makeDistortionCurve(Math.min(speed * 2, 400));
-            }
-            if (Math.random() > 0.5) {
-                let drop = document.createElement('div');
-                drop.classList.add('trail-drop');
-                drop.innerText = glitchChars[Math.floor(Math.random() * glitchChars.length)];
-                drop.style.left = e.clientX + (Math.random() * 20 - 10) + 'px';
-                drop.style.top = e.clientY + (Math.random() * 20 - 10) + 'px';
-                document.body.appendChild(drop);
-                setTimeout(() => drop.remove(), 1500);
+                distortionNode.curve = makeDistortionCurve(Math.min(speed * 3, 500));
             }
         });
 
-        const filterNoise = document.getElementById('noise-anim');
+        // Анимация центра (дыхание плоти)
         let phase = 0;
-        function animateFlesh() { phase += 0.05; filterNoise.setAttribute('baseFrequency', `0.02 ${0.1 + Math.sin(phase) * 0.05}`); requestAnimationFrame(animateFlesh); }
+        const coreEntity = document.getElementById('core-entity');
+        
+        // Если навести мышь на центр - плоть сходит с ума
+        coreEntity.addEventListener('mouseenter', () => { if(gainNode) gainNode.gain.setTargetAtTime(0.1, audioCtx.currentTime, 0.1); });
+        coreEntity.addEventListener('mouseleave', () => { if(gainNode) gainNode.gain.setTargetAtTime(0.05, audioCtx.currentTime, 0.5); });
+
+        function animateFlesh() { 
+            phase += 0.03; 
+            // Искажение зависит от того, наведена ли мышь на центр
+            let intensity = coreEntity.matches(':hover') ? 0.3 : 0.05;
+            filterNoise.setAttribute('baseFrequency', `0.02 ${intensity + Math.sin(phase) * 0.02}`); 
+            requestAnimationFrame(animateFlesh); 
+        }
         animateFlesh();
 
-        const textElement = document.getElementById('scramble-text');
-        const originalText = textElement.innerText;
-        function glitchText() {
-            if (Math.random() > 0.9) {
-                let currentText = originalText.split('');
-                let breaks = Math.floor(Math.random() * 4) + 2; 
-                for(let i=0; i<breaks; i++) {
-                    let idx = Math.floor(Math.random() * currentText.length);
-                    if(currentText[idx] !== ' ') currentText[idx] = glitchChars[Math.floor(Math.random() * glitchChars.length)];
+        // 2. СМОТРЯЩИЕ ЗА ТОБОЙ (Логика Canvas)
+        function initWatchers() {
+            const canvas = document.getElementById('watchers-canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            const eyes = [];
+            const spacing = 50; // Расстояние между глазами
+            
+            for (let x = 0; x < canvas.width; x += spacing) {
+                for (let y = 0; y < canvas.height; y += spacing) {
+                    // Глаза появляются со случайным смещением
+                    eyes.push({ x: x + Math.random() * 20, y: y + Math.random() * 20 });
                 }
-                textElement.innerText = currentText.join('');
-            } else textElement.innerText = originalText;
-            setTimeout(glitchText, Math.random() * 200 + 50);
+            }
+
+            function drawWatchers() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                
+                eyes.forEach(eye => {
+                    const dx = mouseX - eye.x;
+                    const dy = mouseY - eye.y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    
+                    // Рисуем точку только если она относительно близко к курсору (эффект фонарика во тьме)
+                    if (distance < 300) {
+                        const angle = Math.atan2(dy, dx);
+                        const intensity = 1 - (distance / 300);
+                        
+                        // "Зрачок" смещается в сторону курсора
+                        const pupilX = eye.x + Math.cos(angle) * 3;
+                        const pupilY = eye.y + Math.sin(angle) * 3;
+
+                        ctx.fillStyle = `rgba(138, 3, 3, ${intensity * 0.5})`; // Цвет крови
+                        ctx.beginPath();
+                        ctx.arc(pupilX, pupilY, 2, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                });
+                requestAnimationFrame(drawWatchers);
+            }
+            drawWatchers();
+
+            window.addEventListener('resize', () => {
+                canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+            });
         }
-        glitchText();
 
-        const rosterItems = document.querySelectorAll('.roster-item');
-        const dynamicBg = document.getElementById('dynamic-bg');
-        let hoverAudio = new Audio();
-        rosterItems.forEach(item => {
-            item.addEventListener('mouseenter', () => {
-                const bgPath = item.getAttribute('data-bg'); if(bgPath) { dynamicBg.style.backgroundImage = `url(${bgPath})`; dynamicBg.style.opacity = 1; }
-                const audioPath = item.getAttribute('data-audio'); if(audioPath) { hoverAudio.src = audioPath; hoverAudio.volume = 0.5; hoverAudio.play().catch(e=>{}); }
-            });
-            item.addEventListener('mouseleave', () => {
-                dynamicBg.style.opacity = 0; hoverAudio.pause(); hoverAudio.currentTime = 0; 
-            });
-        });
+        // 3. ОТКРЫТИЕ/ЗАКРЫТИЕ ОКОН (OVERLAYS) И ЗВУК
+        function openOverlay(id) {
+            activeOverlay = id;
+            const el = document.getElementById(id);
+            el.style.display = 'flex';
+            setTimeout(() => { el.style.opacity = 1; }, 10);
 
-        const terminal = document.getElementById('terminal');
-        const termInput = document.getElementById('term-input');
-        const termError = document.getElementById('term-error');
+            // Переключение звука: отключаем дисторшн, включаем Эмбиент из Майнкрафта
+            if(gainNode) gainNode.gain.setTargetAtTime(0, audioCtx.currentTime, 0.5);
+            fadeAudio(enderAudio, 0.6);
 
-        function openTerminal() { terminal.style.display = 'flex'; setTimeout(() => termInput.focus(), 100); updateAudioVolumes(); }
-        function closeTerminal() { terminal.style.display = 'none'; termInput.value = ''; termError.style.opacity = 0; updateAudioVolumes(); }
+            if(id === 'arg') document.getElementById('term-input').focus();
+        }
 
-        termInput.addEventListener('keydown', (e) => {
+        function closeOverlay() {
+            if(!activeOverlay) return;
+            const el = document.getElementById(activeOverlay);
+            el.style.opacity = 0;
+            setTimeout(() => { el.style.display = 'none'; activeOverlay = null; }, 500);
+
+            // Возвращаем дисторшн, глушим Эмбиент
+            if(gainNode) gainNode.gain.setTargetAtTime(0.05, audioCtx.currentTime, 0.5);
+            fadeAudio(enderAudio, 0);
+            
+            document.getElementById('term-input').value = '';
+            document.getElementById('term-error').style.opacity = 0;
+        }
+
+        // Логика ARG Терминала
+        document.getElementById('term-input').addEventListener('keydown', (e) => {
             if (e.key === 'Enter') {
-                const password = termInput.value.toUpperCase().trim();
+                const password = e.target.value.toUpperCase().trim();
                 if (password === 'СИМБИОЗ' || password === 'ENTER') { 
-                    termInput.style.color = "#00ff00"; termInput.value = "ДОСТУП РАЗРЕШЕН...";
+                    e.target.style.color = "#00ff00"; e.target.value = "ДОСТУП РАЗРЕШЕН...";
                     setTimeout(() => { window.location.href = "https://t.me/your_secret_channel"; }, 1500);
                 } else {
-                    termError.style.opacity = 1; document.body.style.transform = "translate(10px, -10px)";
-                    setTimeout(() => document.body.style.transform = "none", 100);
-                    termInput.value = '';
+                    const err = document.getElementById('term-error');
+                    err.style.opacity = 1; 
+                    document.getElementById('arg').querySelector('.overlay-content').style.transform = "translate(10px, -10px)";
+                    setTimeout(() => document.getElementById('arg').querySelector('.overlay-content').style.transform = "none", 100);
+                    e.target.value = '';
                 }
             }
         });
