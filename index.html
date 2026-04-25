@@ -1,19 +1,3 @@
-Понял. Отличная идея, это добавит секции глубины и фирменного стиля.
-
-Я интегрировал ваше фоновое лого (`111111.png`) за блоком "СИМБИОНТЫ". Оно будет большим, полупрозрачным и отцентрованным внутри этой секции, не мешая тексту.
-
-**Что я сделал:**
-
-1.  **HTML:** Добавил `id="roster-section"` к секции "СИМБИОНТЫ", чтобы можно было стилизовать именно ее.
-2.  **CSS:** Написал новый стиль для `#roster-section::before`. Этот псевдо-элемент создает "виртуальный" слой внутри секции, куда я и поместил ваше лого в качестве фона. Он расположен позади текста, но поверх фона самой секции.
-
-Ниже **полный и готовый код** для вашего файла `index.html`. Просто скопируйте его и полностью замените содержимое вашего файла.
-
----
-
-### **Полный код файла `index.html` (с лого на фоне)**
-
-```html
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -100,7 +84,7 @@
             min-height: 100vh; display: flex; flex-direction: column;
             align-items: center; justify-content: center; position: relative; z-index: 10;
             padding: 4rem 2rem; box-sizing: border-box;
-            overflow: hidden; /* Чтобы фон не вылезал за пределы секции */
+            overflow: hidden;
         }
         .top-section { position: relative; overflow: hidden; }
         #bg-video {
@@ -129,32 +113,35 @@
         .brand { font-size: 4rem; font-weight: 700; letter-spacing: 0.5rem; margin: 0; mix-blend-mode: exclusion; text-align: center; }
         .manifesto { margin-top: 2rem; letter-spacing: 0.2rem; font-weight: 400; color: var(--text-color-muted); text-align: center; max-width: 600px; text-shadow: 0 0 5px var(--bg-color); }
         
-        /* --- НОВЫЕ СТИЛИ ДЛЯ ФОНА СЕКЦИИ "СИМБИОНТЫ" --- */
+        /* --- ИСПРАВЛЕННЫЕ СТИЛИ --- */
         #roster-section::before {
             content: '';
             position: absolute;
-            top: 50%;
-            left: 50%;
+            top: 50%; left: 50%;
             transform: translate(-50%, -50%);
-            width: 70vw; /* Ширина лого */
-            height: 70vh; /* Высота лого */
-            background-image: url('111111.png'); /* Путь к вашему файлу */
+            width: 70vw; height: 70vh;
+            background-image: url('111111.png');
             background-size: contain;
             background-repeat: no-repeat;
             background-position: center;
-            opacity: 0.05; /* Полупрозрачность */
-            filter: grayscale(100%); /* Делает лого черно-белым */
-            z-index: -1; /* Помещает фон за текстом */
+            opacity: 0.05;
+            filter: grayscale(100%);
+            z-index: 1; /* Ставим СРАЗУ ЗА контентом, а не за всей секцией */
         }
         body.light-mode #roster-section::before {
-            filter: grayscale(100%) invert(1); /* Инвертируем цвет фона в светлой теме */
+            filter: grayscale(100%) invert(1);
         }
-        /* --- КОНЕЦ НОВЫХ СТИЛЕЙ --- */
+        .roster-content-wrapper {
+            position: relative; /* Чтобы контент был над фоном */
+            z-index: 2;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        /* --- КОНЕЦ ИСПРАВЛЕНИЙ --- */
 
-        .roster-title { 
-            position: relative; /* Чтобы быть над фоном */
-            font-size: 1rem; letter-spacing: 1rem; font-weight: 700; color: var(--accent-color); margin-bottom: 3rem; text-transform: uppercase; text-align: center;
-        }
+        .roster-title { font-size: 1rem; letter-spacing: 1rem; font-weight: 700; color: var(--accent-color); margin-bottom: 3rem; text-transform: uppercase; text-align: center; }
         .roster-list { list-style: none; padding: 0; text-align: center; width: 100%; margin-bottom: 2rem; }
         .roster-item {
             font-size: 4rem; font-weight: 700; text-transform: uppercase;
@@ -260,15 +247,17 @@
         </div>
     </div>
 
-    <!-- ИЗМЕНЕНИЕ В HTML: ДОБАВЛЕН ID ДЛЯ СЕКЦИИ -->
+    <!-- ИСПРАВЛЕННАЯ СЕКЦИЯ: КОНТЕНТ ОБЕРНУТ В DIV -->
     <div class="section" id="roster-section">
-        <div class="roster-title">СИМБИОНТЫ</div>
-        <ul class="roster-list">
-            <li class="roster-item" data-bg="artist1.gif" data-audio="noise_burst.mp3">ТВОЙ НИКНЕЙМ</li>
-            <li class="roster-item" data-bg="artist2.gif" data-audio="noise_burst.mp3">АРТИСТ 2</li>
-            <li class="roster-item" data-bg="" data-audio="">АРТИСТ 3</li>
-        </ul>
-        <a href="artists.html" class="btn">ВСЕ АРТИСТЫ</a>
+        <div class="roster-content-wrapper">
+            <div class="roster-title">СИМБИОНТЫ</div>
+            <ul class="roster-list">
+                <li class="roster-item" data-bg="artist1.gif" data-audio="noise_burst.mp3">ТВОЙ НИКНЕЙМ</li>
+                <li class="roster-item" data-bg="artist2.gif" data-audio="noise_burst.mp3">АРТИСТ 2</li>
+                <li class="roster-item" data-bg="" data-audio="">АРТИСТ 3</li>
+            </ul>
+            <a href="artists.html" class="btn">ВСЕ АРТИСТЫ</a>
+        </div>
     </div>
 
     <div id="void-zone">
@@ -343,4 +332,3 @@
     </script>
 </body>
 </html>
-```
