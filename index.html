@@ -41,24 +41,23 @@
         }
         a, button, .roster-item { cursor: pointer; }
         
-        /* --- СТИЛИ ДЛЯ НОВОГО ЗАГРУЗОЧНОГО ЭКРАНА --- */
         #loader-screen {
             position: fixed;
             top: 0;
             left: 0;
             width: 100vw;
             height: 100vh;
-            background-color: #808080; /* Пустой серый фон */
+            background-color: #808080;
             z-index: 2000;
             display: flex;
             justify-content: center;
             align-items: center;
             opacity: 1;
-            transition: opacity 0.5s ease-out; /* Плавное исчезновение */
+            transition: opacity 0.5s ease-out;
         }
         #loader-screen.hidden {
             opacity: 0;
-            pointer-events: none; /* Отключаем взаимодействие после исчезновения */
+            pointer-events: none;
         }
         #loader-om-container {
             width: 200px;
@@ -192,7 +191,6 @@
 </head>
 <body>
     
-    <!-- НОВЫЙ ЗАГРУЗОЧНЫЙ ЭКРАН -->
     <div id="loader-screen">
         <div id="loader-om-container"></div>
     </div>
@@ -242,7 +240,6 @@
         </ul>
         <a href="artists.html" class="btn">ВСЕ АРТИСТЫ</a>
     </div>
-
     <div id="void-zone">
         <div class="section" style="min-height: auto; padding-top: 2rem;">
             <div class="roster-title">МАТЕРИАЛИЗАЦИЯ: РИТУАЛЫ</div>
@@ -295,7 +292,6 @@
             </div>
         </footer>
     </div>
-
     <div id="terminal">
         <div>ТРЕБУЕТСЯ КЛЮЧ ДОСТУПА. СЛУШАЙ ВНИМАТЕЛЬНО.</div>
         <input type="text" id="term-input" autocomplete="off" spellcheck="false">
@@ -309,31 +305,35 @@
     <script>
     document.addEventListener('DOMContentLoaded', function () {
 
+        // --- ОБЩИЙ ШЕЙДЕР ДЛЯ ОБЕИХ МОДЕЛЕЙ ---
+        const chromeMaterial = new THREE.ShaderMaterial({
+            uniforms: { time: { value: 0 } },
+            vertexShader: `varying vec3 vNormal; varying vec3 vViewPosition; varying vec3 vWorldPosition; void main() { vec4 worldPos = modelMatrix * vec4(position, 1.0); vWorldPosition = worldPos.xyz; vec4 mvPosition = viewMatrix * worldPos; vViewPosition = -mvPosition.xyz; vNormal = normalize(normalMatrix * normal); gl_Position = projectionMatrix * mvPosition; }`,
+            fragmentShader: `uniform float time; varying vec3 vNormal; varying vec3 vViewPosition; varying vec3 vWorldPosition; vec3 hsv2rgb(vec3 c) { vec4 K = vec4(1.0, 2.0/3.0, 1.0/3.0, 3.0); vec3 p = abs(fract(c.xxx + K.xyz) * 6.0 - K.www); return c.z * mix(K.xxx, clamp(p - K.xxx, 0.0, 1.0), c.y); } void main() { vec3 normal = normalize(vNormal); vec3 viewDir = normalize(vViewPosition); vec3 reflectDir = reflect(-viewDir, normal); float fresnel = pow(1.0 - max(dot(viewDir, normal), 0.0), 2.0); float hue = atan(reflectDir.y, reflectDir.x) / (2.0 * 3.14159) + 0.5; hue += reflectDir.z * 0.3; hue += time * 0.15; hue = fract(hue); float hue2 = fract(hue + normal.x * 0.2 + normal.y * 0.1 + time * 0.1); vec3 rainbowColor = hsv2rgb(vec3(hue2, 0.9, 1.0)); float specular = pow(max(dot(reflectDir, viewDir), 0.0), 64.0); vec3 specColor = vec3(1.0, 1.0, 1.0) * specular * 2.0; vec3 silver = vec3(0.8, 0.8, 0.85); vec3 color = mix(silver, rainbowColor, 0.75); color += specColor; color = mix(color, vec3(1.0), fresnel * 0.4); float shimmer = sin(vWorldPosition.x * 5.0 + time * 3.0) * cos(vWorldPosition.y * 5.0 + time * 2.0) * sin(vWorldPosition.z * 5.0 + time * 4.0); shimmer = shimmer * 0.5 + 0.5; float hue3 = fract(hue + shimmer * 0.3 + time * 0.05); vec3 shimmerColor = hsv2rgb(vec3(hue3, 1.0, 1.0)); color += shimmerColor * shimmer * 0.3; gl_FragColor = vec4(color, 1.0); }`,
+            side: THREE.DoubleSide,
+        });
+
         // --- ЛОГИКА ДЛЯ 3D-ПРЕЛОАДЕРА ---
         function initLoader3D() {
             const container = document.getElementById('loader-om-container');
             if (!container) return;
-
             const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
             renderer.setSize(container.clientWidth, container.clientHeight);
             container.appendChild(renderer.domElement);
-
             const scene = new THREE.Scene();
             
-            // Изометрическая камера
+            // ИЗМЕНЕННАЯ КАМЕРА: смотрит прямо, без наклона
             const frustumSize = 8;
             const aspect = container.clientWidth / container.clientHeight;
             const camera = new THREE.OrthographicCamera(frustumSize * aspect / -2, frustumSize * aspect / 2, frustumSize / 2, frustumSize / -2, 0.1, 1000);
-            camera.position.set(5, 5, 5);
+            camera.position.set(0, 0, 5); // Смотрит прямо
             camera.lookAt(scene.position);
 
             let loaderModel;
             const loader = new THREE.OBJLoader();
             loader.load('om.obj', function(object) {
-                // Простой белый материал для прелоадера
-                const material = new THREE.MeshBasicMaterial({ color: 0xffffff });
-                object.traverse(child => { if (child.isMesh) child.material = material; });
-                
+                // Теперь используется тот же хромовый материал
+                object.traverse(child => { if (child.isMesh) child.material = chromeMaterial; });
                 const box = new THREE.Box3().setFromObject(object);
                 const center = box.getCenter(new THREE.Vector3());
                 object.position.sub(center);
@@ -341,9 +341,12 @@
                 loaderModel = object;
                 scene.add(loaderModel);
             });
-
+            
+            const clock = new THREE.Clock();
             function animate() {
                 requestAnimationFrame(animate);
+                const elapsed = clock.getElapsedTime();
+                chromeMaterial.uniforms.time.value = elapsed; // Анимируем цвет
                 if (loaderModel) {
                     loaderModel.rotation.y += 0.02;
                 }
@@ -352,7 +355,7 @@
             animate();
         }
 
-        // --- ЛОГИКА ДЛЯ ОСНОВНОЙ 3D-МОДЕЛИ (ХРОМ) ---
+        // --- ЛОГИКА ДЛЯ ОСНОВНОЙ 3D-МОДЕЛИ ---
         function initMain3DObject() {
             const container = document.getElementById('om-container');
             if (!container) return;
@@ -380,19 +383,12 @@
             const pointLight2 = new THREE.PointLight(0x00ffff, 2, 20);
             pointLight2.position.set(-3, -3, 3);
             scene.add(pointLight2);
-            const chromeMaterial = new THREE.ShaderMaterial({
-                uniforms: { time: { value: 0 } },
-                vertexShader: `varying vec3 vNormal; varying vec3 vViewPosition; varying vec3 vWorldPosition; void main() { vec4 worldPos = modelMatrix * vec4(position, 1.0); vWorldPosition = worldPos.xyz; vec4 mvPosition = viewMatrix * worldPos; vViewPosition = -mvPosition.xyz; vNormal = normalize(normalMatrix * normal); gl_Position = projectionMatrix * mvPosition; }`,
-                fragmentShader: `uniform float time; varying vec3 vNormal; varying vec3 vViewPosition; varying vec3 vWorldPosition; vec3 hsv2rgb(vec3 c) { vec4 K = vec4(1.0, 2.0/3.0, 1.0/3.0, 3.0); vec3 p = abs(fract(c.xxx + K.xyz) * 6.0 - K.www); return c.z * mix(K.xxx, clamp(p - K.xxx, 0.0, 1.0), c.y); } void main() { vec3 normal = normalize(vNormal); vec3 viewDir = normalize(vViewPosition); vec3 reflectDir = reflect(-viewDir, normal); float fresnel = pow(1.0 - max(dot(viewDir, normal), 0.0), 2.0); float hue = atan(reflectDir.y, reflectDir.x) / (2.0 * 3.14159) + 0.5; hue += reflectDir.z * 0.3; hue += time * 0.15; hue = fract(hue); float hue2 = fract(hue + normal.x * 0.2 + normal.y * 0.1 + time * 0.1); vec3 rainbowColor = hsv2rgb(vec3(hue2, 0.9, 1.0)); float specular = pow(max(dot(reflectDir, viewDir), 0.0), 64.0); vec3 specColor = vec3(1.0, 1.0, 1.0) * specular * 2.0; vec3 silver = vec3(0.8, 0.8, 0.85); vec3 color = mix(silver, rainbowColor, 0.75); color += specColor; color = mix(color, vec3(1.0), fresnel * 0.4); float shimmer = sin(vWorldPosition.x * 5.0 + time * 3.0) * cos(vWorldPosition.y * 5.0 + time * 2.0) * sin(vWorldPosition.z * 5.0 + time * 4.0); shimmer = shimmer * 0.5 + 0.5; float hue3 = fract(hue + shimmer * 0.3 + time * 0.05); vec3 shimmerColor = hsv2rgb(vec3(hue3, 1.0, 1.0)); color += shimmerColor * shimmer * 0.3; gl_FragColor = vec4(color, 1.0); }`,
-                side: THREE.DoubleSide,
-            });
+            
             let omObject = null;
             const loader = new THREE.OBJLoader();
             loader.load('om.obj',
                 function(object) {
-                    object.traverse(function(child) {
-                        if (child.isMesh) { child.material = chromeMaterial; child.geometry.computeVertexNormals(); }
-                    });
+                    object.traverse(child => { if (child.isMesh) child.material = chromeMaterial; });
                     const box = new THREE.Box3().setFromObject(object);
                     const center = box.getCenter(new THREE.Vector3());
                     const size = box.getSize(new THREE.Vector3());
@@ -403,24 +399,24 @@
                     scene.add(object);
                     omObject = object;
 
-                    // --- ТРИГГЕР ПОСЛЕ ЗАГРУЗКИ ---
-                    const loaderScreen = document.getElementById('loader-screen');
-                    if (loaderScreen) {
-                        loaderScreen.classList.add('hidden');
-                        setTimeout(() => { loaderScreen.style.display = 'none'; }, 500); // 500ms - время анимации в CSS
-                    }
-                    // Запускаем звуки и другие эффекты только сейчас
-                    initExperience();
+                    // ИСКУССТВЕННАЯ ЗАДЕРЖКА в 2 секунды
+                    setTimeout(() => {
+                        const loaderScreen = document.getElementById('loader-screen');
+                        if (loaderScreen) {
+                            loaderScreen.classList.add('hidden');
+                            setTimeout(() => { loaderScreen.style.display = 'none'; }, 500);
+                        }
+                        initExperience();
+                    }, 2000);
                 },
                 function(xhr) { console.log((xhr.loaded / xhr.total * 100) + '% loaded'); },
                 function(error) { 
                     console.error('Error loading om.obj:', error); 
-                    // Если основная модель не загрузилась, все равно убираем прелоадер
-                    const loaderScreen = document.getElementById('loader-screen');
-                    if (loaderScreen) {
-                        loaderScreen.classList.add('hidden');
-                    }
-                    initExperience();
+                    setTimeout(() => {
+                        const loaderScreen = document.getElementById('loader-screen');
+                        if (loaderScreen) loaderScreen.classList.add('hidden');
+                        initExperience();
+                    }, 2000);
                 }
             );
             window.addEventListener('resize', () => {
@@ -458,7 +454,6 @@
         const MAX_AMBIENT_VOL = 0.4;
         const MAX_DRONE_VOL = 0.05;
 
-        // Теперь эта функция не вызывается по клику, а ждет загрузки 3D модели
         async function initExperience() {
             isInitiated = true;
             enderAudio.volume = 0;
@@ -596,10 +591,9 @@
         window.openTerminal = openTerminal;
         window.closeTerminal = closeTerminal;
         
-        // ЗАПУСК ПРОЦЕССОВ
-        initLoader3D(); // Сразу запускаем 3D-прелоадер
-        initMain3DObject(); // В фоне начинаем грузить основную модель
-        animateFlesh(); // Эти анимации могут работать сразу
+        initLoader3D();
+        initMain3DObject();
+        animateFlesh();
         glitchText();
 
     });
