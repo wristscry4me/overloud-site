@@ -10,13 +10,27 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;900&display=swap" rel="stylesheet">
 
     <style>
-        /* --- ВАШ CSS --- */
+        /* --- ИЗМЕНЕННЫЕ СТИЛИ --- */
         :root {
+            /* Темная тема по умолчанию */
             --bg-color: #030303;
+            --bg-color-footer: #010101;
             --text-color: #e0e0e0;
-            --flesh-red: #8b0000;
-            --accent: #ff0000;
+            --text-color-muted: #888;
+            --accent-color: #00aaff; /* Новый акцентный цвет - Электрический синий */
+            --border-color: #222;
         }
+
+        body.light-mode {
+            /* Светлая тема (активируется по нажатию 'T') */
+            --bg-color: #f0f0f0;
+            --bg-color-footer: #e5e5e5;
+            --text-color: #1a1a1a;
+            --text-color-muted: #666;
+            --accent-color: #0077cc; /* Чуть темнее синий для контраста на светлом фоне */
+            --border-color: #d0d0d0;
+        }
+
         body, html {
             margin: 0; padding: 0; width: 100%; 
             background-color: var(--bg-color); color: var(--text-color);
@@ -25,6 +39,7 @@
             -moz-osx-font-smoothing: grayscale;
             text-rendering: optimizeLegibility;
             overflow-x: hidden; cursor: crosshair;
+            transition: background-color 0.3s, color 0.3s; /* Плавный переход тем */
         }
         a { text-decoration: none; color: inherit; cursor: crosshair; }
         .navbar {
@@ -35,14 +50,15 @@
         }
         .nav-link {
             pointer-events: auto; font-size: 0.75rem; letter-spacing: 0.2rem; text-transform: uppercase;
-            font-weight: 600; transition: color 0.2s; width: max-content;
+            font-weight: 600; transition: color 0.2s, transform 0.2s; width: max-content;
         }
-        .nav-link:hover { color: var(--flesh-red); text-shadow: 0 0 10px var(--accent); transform: translateX(10px); }
+        .nav-link:hover { color: var(--accent-color); text-shadow: 0 0 10px var(--accent-color); transform: translateX(10px); }
         @media (max-width: 768px) {
             .navbar { 
                 height: auto; padding: 15px 20px; flex-direction: row; 
                 justify-content: center; flex-wrap: wrap; gap: 15px; 
                 background: rgba(0,0,0,0.8); border-bottom: 1px solid #111;
+                mix-blend-mode: normal; /* Убираем инверсию на мобильных для читаемости */
             }
             .nav-link { font-size: 0.65rem; letter-spacing: 0.1rem; transform: none !important; }
         }
@@ -57,7 +73,7 @@
         }
         @keyframes pulseText { 0%, 100% { opacity: 0.3; } 50% { opacity: 1; } }
         .trail-drop {
-            position: fixed; color: var(--flesh-red); font-size: 10px;
+            position: fixed; color: var(--accent-color); font-size: 10px;
             pointer-events: none; z-index: 999;
             animation: fadeDrop 1.5s forwards; mix-blend-mode: screen;
         }
@@ -95,53 +111,79 @@
         
         @keyframes breathe { 0% { transform: scale(0.95); opacity: 0.8; } 100% { transform: scale(1.05); } }
         .brand { font-size: 4rem; font-weight: 900; letter-spacing: 0.5rem; margin: 0; mix-blend-mode: exclusion; text-align: center; }
-        .manifesto { margin-top: 2rem; letter-spacing: 0.2rem; font-weight: 600; color: #888; text-align: center; max-width: 600px; text-shadow: 0 0 5px #000; }
-        .roster-title { font-size: 1rem; letter-spacing: 1rem; font-weight: 600; color: var(--flesh-red); margin-bottom: 3rem; text-transform: uppercase; text-align: center;}
+        .manifesto { margin-top: 2rem; letter-spacing: 0.2rem; font-weight: 600; color: var(--text-color-muted); text-align: center; max-width: 600px; text-shadow: 0 0 5px var(--bg-color); }
+        .roster-title { font-size: 1rem; letter-spacing: 1rem; font-weight: 600; color: var(--accent-color); margin-bottom: 3rem; text-transform: uppercase; text-align: center;}
         .roster-list { list-style: none; padding: 0; text-align: center; width: 100%; margin-bottom: 2rem; }
         .roster-item {
             font-size: 4rem; font-weight: 900; text-transform: uppercase;
             color: transparent; -webkit-text-stroke: 1px #444; margin: -10px 0;
             cursor: crosshair; transition: 0.1s; position: relative; z-index: 20;
         }
-        .roster-item:hover { color: #fff; -webkit-text-stroke: 0px; transform: scale(1.05) skewX(-5deg); text-shadow: 5px 0px 0px var(--flesh-red); }
+        body.light-mode .roster-item { -webkit-text-stroke: 1px #bbb; } /* Делаем контур светлее в светлой теме */
+        .roster-item:hover { color: var(--text-color); -webkit-text-stroke: 0px; transform: scale(1.05) skewX(-5deg); text-shadow: 5px 0px 0px var(--accent-color); }
         .events-container { width: 100%; max-width: 800px; display: flex; flex-direction: column; gap: 1rem; }
         .event-item {
             display: flex; justify-content: space-between; align-items: center;
-            padding: 1.5rem 0; border-bottom: 1px solid #222;
+            padding: 1.5rem 0; border-bottom: 1px solid var(--border-color);
             font-size: 1rem; font-weight: 600; letter-spacing: 0.2rem; text-transform: uppercase; transition: 0.3s;
         }
-        .event-item:hover { color: #fff; border-bottom-color: var(--flesh-red); transform: translateX(10px); }
+        .event-item:hover { color: var(--text-color); border-bottom-color: var(--accent-color); transform: translateX(10px); }
         .event-date { color: #777; width: 120px; }
         .event-city { font-weight: 900; width: 150px; }
-        .event-venue { flex-grow: 1; color: #aaa; }
-        .sold-out { text-decoration: line-through; color: var(--flesh-red); font-weight: 900; }
+        .event-venue { flex-grow: 1; color: var(--text-color-muted); }
+        .sold-out { text-decoration: line-through; color: var(--accent-color); font-weight: 900; }
         .merch-grid { display: flex; gap: 4rem; justify-content: center; flex-wrap: wrap; margin-bottom: 2rem; }
         .merch-item { text-align: center; position: relative; font-weight: 600; letter-spacing: 0.1rem; }
         .merch-img-placeholder { width: 250px; height: 350px; border: 1px solid #333; display: flex; align-items: center; justify-content: center; color: #333; margin-bottom: 1rem; filter: grayscale(100%); transition: 0.3s;}
         .merch-item:hover .merch-img-placeholder { filter: grayscale(0%) invert(1); }
+        
+        /* --- НОВЫЙ СТИЛЬ КНОПОК --- */
         .btn {
-            display: inline-block; margin-top: 2rem; padding: 15px 40px; background: transparent; color: var(--text-color);
-            border: 1px solid var(--text-color); font-size: 0.8rem; font-weight: 600; letter-spacing: 0.3rem; text-transform: uppercase;
+            position: relative; /* Для псевдо-элемента */
+            display: inline-block; margin-top: 2rem; padding: 15px 5px; /* Уменьшил боковые паддинги */
+            background: transparent; color: var(--text-color);
+            border: none; /* Убрана рамка */
+            font-size: 0.8rem; font-weight: 600; letter-spacing: 0.3rem; text-transform: uppercase;
             cursor: pointer; transition: all 0.2s; z-index: 20; text-align: center;
         }
-        .btn:hover { background: var(--text-color); color: var(--bg-color); }
-        .btn-small { padding: 8px 20px; font-size: 0.7rem; margin-top: 0; }
+        .btn::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 1px;
+            bottom: 5px; /* Расположение линии */
+            left: 0;
+            background-color: var(--accent-color);
+            transform: scaleX(0);
+            transform-origin: center;
+            transition: transform 0.3s ease-out;
+        }
+        .btn:hover {
+            color: var(--accent-color); /* Меняем цвет текста при наведении */
+        }
+        .btn:hover::after {
+            transform: scaleX(1); /* Показываем линию при наведении */
+        }
+        .btn-small { padding: 8px 5px; font-size: 0.7rem; margin-top: 0; }
+        .btn-small::after { bottom: 0; }
+
         .footer {
-            width: 100%; border-top: 1px solid #111; padding: 4rem 2rem;
+            width: 100%; border-top: 1px solid var(--border-color); padding: 4rem 2rem;
             display: flex; justify-content: space-around; flex-wrap: wrap; gap: 2rem;
-            background: #010101; box-sizing: border-box; position: relative; z-index: 10;
+            background: var(--bg-color-footer); box-sizing: border-box; position: relative; z-index: 10;
         }
         .footer-col { display: flex; flex-direction: column; gap: 1rem; }
-        .footer-title { font-size: 0.8rem; font-weight: 900; color: var(--flesh-red); letter-spacing: 0.3rem; margin-bottom: 1rem; }
-        .demo-text { font-size: 0.8rem; font-weight: 400; color: #666; max-width: 300px; line-height: 1.6; letter-spacing: 0.05rem; }
+        .footer-title { font-size: 0.8rem; font-weight: 900; color: var(--accent-color); letter-spacing: 0.3rem; margin-bottom: 1rem; }
+        .demo-text { font-size: 0.8rem; font-weight: 400; color: var(--text-color-muted); max-width: 300px; line-height: 1.6; letter-spacing: 0.05rem; }
+        .demo-text > span { color: var(--accent-color); font-weight: bold; }
         #terminal {
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
             background: rgba(0,0,0,0.95); z-index: 2000; display: none;
             flex-direction: column; justify-content: center; align-items: center;
-            font-family: monospace; color: var(--accent);
+            font-family: monospace; color: var(--accent-color);
         }
         #term-input {
-            background: transparent; border: none; border-bottom: 1px solid var(--accent);
+            background: transparent; border: none; border-bottom: 1px solid var(--accent-color);
             color: #fff; font-size: 2rem; text-align: center; outline: none; text-transform: uppercase;
             font-family: monospace; width: 300px; letter-spacing: 0.5rem; margin-top: 2rem;
         }
@@ -187,6 +229,7 @@
         </div>
     </div>
 
+    <!-- Остальной HTML без изменений -->
     <div class="section">
         <div class="roster-title">СИМБИОНТЫ</div>
         <ul class="roster-list">
@@ -222,7 +265,7 @@
                 <div class="merch-item">
                     <div class="merch-img-placeholder">[ИЗОБРАЖЕНИЕ]</div>
                     <div class="sold-out">КАССЕТА ОВЕРЛАУД</div>
-                    <div style="color: var(--flesh-red); margin-top: 10px;">SOLD OUT</div>
+                    <div>SOLD OUT</div>
                 </div>
                 <div class="merch-item">
                     <div class="merch-img-placeholder">[ИЗОБРАЖЕНИЕ]</div>
@@ -246,7 +289,7 @@
                 <div class="footer-title">АССИМИЛЯЦИЯ (DEMO DROP)</div>
                 <p class="demo-text">
                     Пришлите приватную ссылку на Soundcloud. Расскажите о себе. <br><br>
-                    <span style="color: var(--flesh-red); font-weight: bold;">ВАЖНО:</span> Не прикрепляйте mp3 файлы к письму. Плоть должна быть чистой.
+                    <span>ВАЖНО:</span> Не прикрепляйте mp3 файлы к письму. Плоть должна быть чистой.
                 </p>
                 <a href="mailto:om@owerloud.com?subject=OVERLOUD%20DEMO%20DROP" class="btn btn-small" style="text-align: left; width: fit-content; margin-top: 0;">ОТПРАВИТЬ ПЛОТЬ</a>
             </div>
@@ -256,7 +299,7 @@
     <div id="terminal">
         <div>ТРЕБУЕТСЯ КЛЮЧ ДОСТУПА. СЛУШАЙ ВНИМАТЕЛЬНО.</div>
         <input type="text" id="term-input" autocomplete="off" spellcheck="false">
-        <div id="term-error" style="color: var(--accent); margin-top: 20px; opacity: 0;">ОШИБКА. ПЛОТЬ ОТТОРГНУТА.</div>
+        <div id="term-error" style="color: var(--accent-color); margin-top: 20px; opacity: 0;">ОШИБКА. ПЛОТЬ ОТТОРГНУТА.</div>
         <button class="btn" onclick="closeTerminal()" style="margin-top: 50px; font-size: 0.6rem; border: none;">[Х] ПРЕРВАТЬ</button>
     </div>
 
@@ -266,22 +309,17 @@
     <script>
     document.addEventListener('DOMContentLoaded', function () {
 
-        // --- НОВАЯ ВЕРСИЯ ФУНКЦИИ init3DObject ---
+        // --- 3D-ЛОГИКА ---
         function init3DObject() {
             const container = document.getElementById('om-container');
             if (!container) return;
-
             const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
             renderer.setSize(container.clientWidth, container.clientHeight);
             renderer.setPixelRatio(window.devicePixelRatio);
             container.appendChild(renderer.domElement);
-
             const scene = new THREE.Scene();
-
             const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 100);
             camera.position.set(0, 0, 5);
-
-            // Lights
             const ambientLight = new THREE.AmbientLight(0xffffff, 0.3);
             scene.add(ambientLight);
             const dirLight1 = new THREE.DirectionalLight(0xff0000, 1);
@@ -299,84 +337,59 @@
             const pointLight2 = new THREE.PointLight(0x00ffff, 2, 20);
             pointLight2.position.set(-3, -3, 3);
             scene.add(pointLight2);
-
-            // Chrome rainbow shader material
             const chromeMaterial = new THREE.ShaderMaterial({
-                uniforms: {
-                    time: { value: 0 },
-                },
+                uniforms: { time: { value: 0 } },
                 vertexShader: `
-                    varying vec3 vNormal;
-                    varying vec3 vViewPosition;
-                    varying vec3 vWorldPosition;
+                    varying vec3 vNormal; varying vec3 vViewPosition; varying vec3 vWorldPosition;
                     void main() {
-                    vec4 worldPos = modelMatrix * vec4(position, 1.0);
-                    vWorldPosition = worldPos.xyz;
-                    vec4 mvPosition = viewMatrix * worldPos;
-                    vViewPosition = -mvPosition.xyz;
-                    vNormal = normalize(normalMatrix * normal);
-                    gl_Position = projectionMatrix * mvPosition;
-                    }
-                `,
+                        vec4 worldPos = modelMatrix * vec4(position, 1.0);
+                        vWorldPosition = worldPos.xyz;
+                        vec4 mvPosition = viewMatrix * worldPos;
+                        vViewPosition = -mvPosition.xyz;
+                        vNormal = normalize(normalMatrix * normal);
+                        gl_Position = projectionMatrix * mvPosition;
+                    }`,
                 fragmentShader: `
-                    uniform float time;
-                    varying vec3 vNormal;
-                    varying vec3 vViewPosition;
-                    varying vec3 vWorldPosition;
-
+                    uniform float time; varying vec3 vNormal; varying vec3 vViewPosition; varying vec3 vWorldPosition;
                     vec3 hsv2rgb(vec3 c) {
                         vec4 K = vec4(1.0, 2.0/3.0, 1.0/3.0, 3.0);
                         vec3 p = abs(fract(c.xxx + K.xyz) * 6.0 - K.www);
                         return c.z * mix(K.xxx, clamp(p - K.xxx, 0.0, 1.0), c.y);
                     }
-
                     void main() {
-                        vec3 normal = normalize(vNormal);
-                        vec3 viewDir = normalize(vViewPosition);
+                        vec3 normal = normalize(vNormal); vec3 viewDir = normalize(vViewPosition);
                         vec3 reflectDir = reflect(-viewDir, normal);
                         float fresnel = pow(1.0 - max(dot(viewDir, normal), 0.0), 2.0);
                         float hue = atan(reflectDir.y, reflectDir.x) / (2.0 * 3.14159) + 0.5;
-                        hue += reflectDir.z * 0.3;
-                        hue += time * 0.15;
-                        hue = fract(hue);
+                        hue += reflectDir.z * 0.3; hue += time * 0.15; hue = fract(hue);
                         float hue2 = fract(hue + normal.x * 0.2 + normal.y * 0.1 + time * 0.1);
                         vec3 rainbowColor = hsv2rgb(vec3(hue2, 0.9, 1.0));
                         float specular = pow(max(dot(reflectDir, viewDir), 0.0), 64.0);
                         vec3 specColor = vec3(1.0, 1.0, 1.0) * specular * 2.0;
                         vec3 silver = vec3(0.8, 0.8, 0.85);
                         vec3 color = mix(silver, rainbowColor, 0.75);
-                        color += specColor;
-                        color = mix(color, vec3(1.0), fresnel * 0.4);
-                        float shimmer = sin(vWorldPosition.x * 5.0 + time * 3.0) *
-                                        cos(vWorldPosition.y * 5.0 + time * 2.0) *
-                                        sin(vWorldPosition.z * 5.0 + time * 4.0);
+                        color += specColor; color = mix(color, vec3(1.0), fresnel * 0.4);
+                        float shimmer = sin(vWorldPosition.x * 5.0 + time * 3.0) * cos(vWorldPosition.y * 5.0 + time * 2.0) * sin(vWorldPosition.z * 5.0 + time * 4.0);
                         shimmer = shimmer * 0.5 + 0.5;
                         float hue3 = fract(hue + shimmer * 0.3 + time * 0.05);
                         vec3 shimmerColor = hsv2rgb(vec3(hue3, 1.0, 1.0));
                         color += shimmerColor * shimmer * 0.3;
-
                         gl_FragColor = vec4(color, 1.0);
-                    }
-                `,
+                    }`,
                 side: THREE.DoubleSide,
             });
-
             let omObject = null;
             const loader = new THREE.OBJLoader();
-            loader.load(
-                'om.obj',
+            loader.load('om.obj',
                 function(object) {
                     object.traverse(function(child) {
-                        if (child.isMesh) {
-                            child.material = chromeMaterial;
-                            child.geometry.computeVertexNormals();
-                        }
+                        if (child.isMesh) { child.material = chromeMaterial; child.geometry.computeVertexNormals(); }
                     });
                     const box = new THREE.Box3().setFromObject(object);
                     const center = box.getCenter(new THREE.Vector3());
                     const size = box.getSize(new THREE.Vector3());
                     const maxDim = Math.max(size.x, size.y, size.z);
-                    const scale = 2.5 / maxDim; // Сделал чуть побольше, можете настроить
+                    const scale = 2.5 / maxDim;
                     object.position.sub(center.multiplyScalar(scale));
                     object.scale.setScalar(scale);
                     scene.add(object);
@@ -385,21 +398,15 @@
                 function(xhr) { console.log((xhr.loaded / xhr.total * 100) + '% loaded'); },
                 function(error) { console.error('Error loading om.obj:', error); }
             );
-
             window.addEventListener('resize', () => {
-                const w = container.clientWidth;
-                const h = container.clientHeight;
-                camera.aspect = w / h;
-                camera.updateProjectionMatrix();
-                renderer.setSize(w, h);
+                const w = container.clientWidth; const h = container.clientHeight;
+                camera.aspect = w / h; camera.updateProjectionMatrix(); renderer.setSize(w, h);
             });
-
             const clock = new THREE.Clock();
             function animate() {
                 requestAnimationFrame(animate);
                 const elapsed = clock.getElapsedTime();
                 chromeMaterial.uniforms.time.value = elapsed;
-
                 dirLight1.position.x = Math.sin(elapsed * 0.7) * 5;
                 dirLight1.position.y = Math.cos(elapsed * 0.5) * 5;
                 dirLight2.position.x = Math.cos(elapsed * 0.6) * 5;
@@ -408,14 +415,8 @@
                 pointLight1.position.z = Math.cos(elapsed * 0.9) * 4;
                 pointLight2.position.y = Math.cos(elapsed * 1.1) * 4;
                 pointLight2.position.z = Math.sin(elapsed * 0.7) * 4;
-
-                const h1 = (elapsed * 0.1) % 1;
-                const h2 = (elapsed * 0.1 + 0.33) % 1;
-                const h3 = (elapsed * 0.1 + 0.66) % 1;
-                dirLight1.color.setHSL(h1, 1, 0.5);
-                dirLight2.color.setHSL(h2, 1, 0.5);
-                dirLight3.color.setHSL(h3, 1, 0.5);
-
+                const h1 = (elapsed * 0.1) % 1; const h2 = (elapsed * 0.1 + 0.33) % 1; const h3 = (elapsed * 0.1 + 0.66) % 1;
+                dirLight1.color.setHSL(h1, 1, 0.5); dirLight2.color.setHSL(h2, 1, 0.5); dirLight3.color.setHSL(h3, 1, 0.5);
                 if (omObject) {
                     omObject.rotation.y += 0.020;
                     omObject.rotation.x = Math.sin(elapsed * 0.3) * 0.15;
@@ -446,9 +447,7 @@
             distortionNode.curve = makeDistortionCurve(0);
             distortionNode.oversample = '4x';
             gainNode.gain.setValueAtTime(MAX_DRONE_VOL, audioCtx.currentTime);
-            osc.connect(distortionNode);
-            distortionNode.connect(gainNode);
-            gainNode.connect(audioCtx.destination);
+            osc.connect(distortionNode).connect(gainNode).connect(audioCtx.destination);
             osc.start();
             updateAudioVolumes();
         }
@@ -567,6 +566,18 @@
                     setTimeout(() => document.body.style.transform = "none", 100);
                     termInput.value = '';
                 }
+            }
+        });
+
+        // --- НОВЫЙ КОД: ПЕРЕКЛЮЧАТЕЛЬ ТЕМЫ ---
+        window.addEventListener('keydown', (e) => {
+            // Не переключать тему, если пользователь печатает в терминале
+            if (document.activeElement === termInput) {
+                return;
+            }
+            // Переключаем по клавише 'T'
+            if (e.key.toLowerCase() === 't') {
+                document.body.classList.toggle('light-mode');
             }
         });
 
