@@ -7,41 +7,45 @@
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;900&display=swap" rel="stylesheet">
+    <!-- Подключаем новый шрифт Roboto Mono -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
 
     <style>
-        /* --- ИЗМЕНЕННЫЕ СТИЛИ --- */
         :root {
-            /* Темная тема по умолчанию */
+            /* Темная тема по умолчанию (монохром) */
             --bg-color: #030303;
             --bg-color-footer: #010101;
             --text-color: #e0e0e0;
-            --text-color-muted: #888;
-            --accent-color: #00aaff; /* Новый акцентный цвет - Электрический синий */
+            --text-color-muted: #666;
+            --accent-color: var(--text-color); /* Акцентный цвет теперь просто белый */
             --border-color: #222;
         }
 
         body.light-mode {
-            /* Светлая тема (активируется по нажатию 'T') */
+            /* Светлая тема */
             --bg-color: #f0f0f0;
             --bg-color-footer: #e5e5e5;
             --text-color: #1a1a1a;
-            --text-color-muted: #666;
-            --accent-color: #0077cc; /* Чуть темнее синий для контраста на светлом фоне */
+            --text-color-muted: #777;
+            --accent-color: var(--text-color); /* Акцентный цвет теперь просто черный */
             --border-color: #d0d0d0;
         }
 
         body, html {
             margin: 0; padding: 0; width: 100%; 
             background-color: var(--bg-color); color: var(--text-color);
-            font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif;
+            /* Новый шрифт */
+            font-family: 'Roboto Mono', 'Inter', monospace;
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
             text-rendering: optimizeLegibility;
-            overflow-x: hidden; cursor: crosshair;
-            transition: background-color 0.3s, color 0.3s; /* Плавный переход тем */
+            overflow-x: hidden; 
+            cursor: default; /* Обычный курсор */
+            transition: background-color 0.3s, color 0.3s;
         }
-        a { text-decoration: none; color: inherit; cursor: crosshair; }
+        a, button, .roster-item { cursor: pointer; } /* Курсор-палец для интерактивных элементов */
+        
+        a { text-decoration: none; color: inherit; }
         .navbar {
             position: fixed; top: 0; left: 0; height: 100vh; padding: 0 40px; 
             display: flex; flex-direction: column; justify-content: center; 
@@ -50,7 +54,8 @@
         }
         .nav-link {
             pointer-events: auto; font-size: 0.75rem; letter-spacing: 0.2rem; text-transform: uppercase;
-            font-weight: 600; transition: color 0.2s, transform 0.2s; width: max-content;
+            font-weight: 700; /* Сделал шрифт жирнее */
+            transition: color 0.2s, transform 0.2s; width: max-content;
         }
         .nav-link:hover { color: var(--accent-color); text-shadow: 0 0 10px var(--accent-color); transform: translateX(10px); }
         @media (max-width: 768px) {
@@ -58,7 +63,7 @@
                 height: auto; padding: 15px 20px; flex-direction: row; 
                 justify-content: center; flex-wrap: wrap; gap: 15px; 
                 background: rgba(0,0,0,0.8); border-bottom: 1px solid #111;
-                mix-blend-mode: normal; /* Убираем инверсию на мобильных для читаемости */
+                mix-blend-mode: normal;
             }
             .nav-link { font-size: 0.65rem; letter-spacing: 0.1rem; transform: none !important; }
         }
@@ -68,16 +73,20 @@
             justify-content: center; align-items: center; cursor: pointer;
         }
         .init-text {
-            font-size: 1rem; letter-spacing: 0.5rem; color: #555; font-weight: 600;
+            font-size: 1rem; letter-spacing: 0.5rem; color: #555; font-weight: 700;
             animation: pulseText 2s infinite; text-transform: uppercase;
         }
         @keyframes pulseText { 0%, 100% { opacity: 0.3; } 50% { opacity: 1; } }
+        
+        /* Эффект от курсора без символов */
         .trail-drop {
-            position: fixed; color: var(--accent-color); font-size: 10px;
+            position: fixed; background: var(--text-color);
+            width: 4px; height: 4px; border-radius: 50%;
             pointer-events: none; z-index: 999;
-            animation: fadeDrop 1.5s forwards; mix-blend-mode: screen;
+            animation: fadeDrop 1s forwards; mix-blend-mode: exclusion;
         }
-        @keyframes fadeDrop { 0% { opacity: 1; transform: scale(1); } 100% { opacity: 0; transform: scale(3) translateY(20px); } }
+        @keyframes fadeDrop { 0% { opacity: 1; transform: scale(1); } 100% { opacity: 0; transform: scale(5) translateY(20px); } }
+
         .section {
             min-height: 100vh; display: flex; flex-direction: column;
             align-items: center; justify-content: center; position: relative; z-index: 10;
@@ -110,60 +119,48 @@
         }
         
         @keyframes breathe { 0% { transform: scale(0.95); opacity: 0.8; } 100% { transform: scale(1.05); } }
-        .brand { font-size: 4rem; font-weight: 900; letter-spacing: 0.5rem; margin: 0; mix-blend-mode: exclusion; text-align: center; }
-        .manifesto { margin-top: 2rem; letter-spacing: 0.2rem; font-weight: 600; color: var(--text-color-muted); text-align: center; max-width: 600px; text-shadow: 0 0 5px var(--bg-color); }
-        .roster-title { font-size: 1rem; letter-spacing: 1rem; font-weight: 600; color: var(--accent-color); margin-bottom: 3rem; text-transform: uppercase; text-align: center;}
+        .brand { font-size: 4rem; font-weight: 700; letter-spacing: 0.5rem; margin: 0; mix-blend-mode: exclusion; text-align: center; }
+        .manifesto { margin-top: 2rem; letter-spacing: 0.2rem; font-weight: 400; color: var(--text-color-muted); text-align: center; max-width: 600px; text-shadow: 0 0 5px var(--bg-color); }
+        .roster-title { font-size: 1rem; letter-spacing: 1rem; font-weight: 700; color: var(--accent-color); margin-bottom: 3rem; text-transform: uppercase; text-align: center;}
         .roster-list { list-style: none; padding: 0; text-align: center; width: 100%; margin-bottom: 2rem; }
         .roster-item {
-            font-size: 4rem; font-weight: 900; text-transform: uppercase;
+            font-size: 4rem; font-weight: 700; text-transform: uppercase;
             color: transparent; -webkit-text-stroke: 1px #444; margin: -10px 0;
-            cursor: crosshair; transition: 0.1s; position: relative; z-index: 20;
+            transition: 0.1s; position: relative; z-index: 20;
         }
-        body.light-mode .roster-item { -webkit-text-stroke: 1px #bbb; } /* Делаем контур светлее в светлой теме */
+        body.light-mode .roster-item { -webkit-text-stroke: 1px #bbb; }
         .roster-item:hover { color: var(--text-color); -webkit-text-stroke: 0px; transform: scale(1.05) skewX(-5deg); text-shadow: 5px 0px 0px var(--accent-color); }
         .events-container { width: 100%; max-width: 800px; display: flex; flex-direction: column; gap: 1rem; }
         .event-item {
             display: flex; justify-content: space-between; align-items: center;
             padding: 1.5rem 0; border-bottom: 1px solid var(--border-color);
-            font-size: 1rem; font-weight: 600; letter-spacing: 0.2rem; text-transform: uppercase; transition: 0.3s;
+            font-size: 1rem; font-weight: 700; letter-spacing: 0.2rem; text-transform: uppercase; transition: 0.3s;
         }
-        .event-item:hover { color: var(--text-color); border-bottom-color: var(--accent-color); transform: translateX(10px); }
-        .event-date { color: #777; width: 120px; }
-        .event-city { font-weight: 900; width: 150px; }
+        .event-item:hover { color: var(--accent-color); border-bottom-color: var(--accent-color); transform: translateX(10px); }
+        .event-date { color: var(--text-color-muted); width: 120px; }
+        .event-city { font-weight: 700; width: 150px; }
         .event-venue { flex-grow: 1; color: var(--text-color-muted); }
-        .sold-out { text-decoration: line-through; color: var(--accent-color); font-weight: 900; }
+        .sold-out { text-decoration: line-through; color: var(--accent-color); font-weight: 700; }
         .merch-grid { display: flex; gap: 4rem; justify-content: center; flex-wrap: wrap; margin-bottom: 2rem; }
-        .merch-item { text-align: center; position: relative; font-weight: 600; letter-spacing: 0.1rem; }
+        .merch-item { text-align: center; position: relative; font-weight: 700; letter-spacing: 0.1rem; }
         .merch-img-placeholder { width: 250px; height: 350px; border: 1px solid #333; display: flex; align-items: center; justify-content: center; color: #333; margin-bottom: 1rem; filter: grayscale(100%); transition: 0.3s;}
         .merch-item:hover .merch-img-placeholder { filter: grayscale(0%) invert(1); }
         
-        /* --- НОВЫЙ СТИЛЬ КНОПОК --- */
         .btn {
-            position: relative; /* Для псевдо-элемента */
-            display: inline-block; margin-top: 2rem; padding: 15px 5px; /* Уменьшил боковые паддинги */
+            position: relative;
+            display: inline-block; margin-top: 2rem; padding: 15px 5px;
             background: transparent; color: var(--text-color);
-            border: none; /* Убрана рамка */
-            font-size: 0.8rem; font-weight: 600; letter-spacing: 0.3rem; text-transform: uppercase;
-            cursor: pointer; transition: all 0.2s; z-index: 20; text-align: center;
+            border: none;
+            font-size: 0.8rem; font-weight: 700; letter-spacing: 0.3rem; text-transform: uppercase;
+            transition: all 0.2s; z-index: 20; text-align: center;
         }
         .btn::after {
-            content: '';
-            position: absolute;
-            width: 100%;
-            height: 1px;
-            bottom: 5px; /* Расположение линии */
-            left: 0;
-            background-color: var(--accent-color);
-            transform: scaleX(0);
-            transform-origin: center;
-            transition: transform 0.3s ease-out;
+            content: ''; position: absolute; width: 100%; height: 1px;
+            bottom: 5px; left: 0; background-color: var(--accent-color);
+            transform: scaleX(0); transform-origin: center; transition: transform 0.3s ease-out;
         }
-        .btn:hover {
-            color: var(--accent-color); /* Меняем цвет текста при наведении */
-        }
-        .btn:hover::after {
-            transform: scaleX(1); /* Показываем линию при наведении */
-        }
+        .btn:hover { color: var(--accent-color); }
+        .btn:hover::after { transform: scaleX(1); }
         .btn-small { padding: 8px 5px; font-size: 0.7rem; margin-top: 0; }
         .btn-small::after { bottom: 0; }
 
@@ -173,19 +170,19 @@
             background: var(--bg-color-footer); box-sizing: border-box; position: relative; z-index: 10;
         }
         .footer-col { display: flex; flex-direction: column; gap: 1rem; }
-        .footer-title { font-size: 0.8rem; font-weight: 900; color: var(--accent-color); letter-spacing: 0.3rem; margin-bottom: 1rem; }
+        .footer-title { font-size: 0.8rem; font-weight: 700; color: var(--accent-color); letter-spacing: 0.3rem; margin-bottom: 1rem; }
         .demo-text { font-size: 0.8rem; font-weight: 400; color: var(--text-color-muted); max-width: 300px; line-height: 1.6; letter-spacing: 0.05rem; }
-        .demo-text > span { color: var(--accent-color); font-weight: bold; }
+        .demo-text > span { color: var(--accent-color); font-weight: 700; }
         #terminal {
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
             background: rgba(0,0,0,0.95); z-index: 2000; display: none;
             flex-direction: column; justify-content: center; align-items: center;
-            font-family: monospace; color: var(--accent-color);
+            font-family: 'Roboto Mono', monospace; color: var(--text-color);
         }
         #term-input {
-            background: transparent; border: none; border-bottom: 1px solid var(--accent-color);
+            background: transparent; border: none; border-bottom: 1px solid var(--text-color);
             color: #fff; font-size: 2rem; text-align: center; outline: none; text-transform: uppercase;
-            font-family: monospace; width: 300px; letter-spacing: 0.5rem; margin-top: 2rem;
+            font-family: 'Roboto Mono', monospace; width: 300px; letter-spacing: 0.5rem; margin-top: 2rem;
         }
     </style>
 </head>
@@ -211,6 +208,8 @@
         <a href="artists.html" class="nav-link">АРТИСТЫ</a>
         <a href="merch.html" class="nav-link">МЕРЧ</a>
         <a href="#footer" class="nav-link">СВЯЗЬ / DEMO</a>
+        <!-- КНОПКА СМЕНЫ ТЕМЫ -->
+        <a href="#" id="theme-toggle" class="nav-link">ТЕМА</a>
     </nav>
 
     <div id="dynamic-bg"></div>
@@ -482,20 +481,20 @@
             return curve;
         }
 
-        const glitchChars = 'АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ!@#$%^&*()';
         document.addEventListener('mousemove', (e) => {
             if (audioCtx && distortionNode && gainNode.gain.value > 0.01) {
                 let speed = Math.abs(e.movementX) + Math.abs(e.movementY);
                 distortionNode.curve = makeDistortionCurve(Math.min(speed * 2, 400));
             }
+            // УБРАН БЛОК С СИМВОЛАМИ, НО СОЗДАНИЕ ТОЧЕК-СЛЕДОВ ОСТАЛОСЬ
             if (Math.random() > 0.5) {
                 let drop = document.createElement('div');
                 drop.classList.add('trail-drop');
-                drop.innerText = glitchChars[Math.floor(Math.random() * glitchChars.length)];
-                drop.style.left = e.clientX + (Math.random() * 20 - 10) + 'px';
-                drop.style.top = e.clientY + (Math.random() * 20 - 10) + 'px';
+                // drop.innerText - убрано, теперь это просто точка из CSS
+                drop.style.left = e.clientX + 'px';
+                drop.style.top = e.clientY + 'px';
                 document.body.appendChild(drop);
-                setTimeout(() => drop.remove(), 1500);
+                setTimeout(() => drop.remove(), 1000);
             }
         });
 
@@ -513,6 +512,7 @@
         const originalText = textElement.innerText;
         function glitchText() {
             if (Math.random() > 0.9) {
+                const glitchChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()';
                 let currentText = originalText.split('');
                 let breaks = Math.floor(Math.random() * 4) + 2; 
                 for(let i=0; i<breaks; i++) {
@@ -568,18 +568,16 @@
                 }
             }
         });
-
-        // --- НОВЫЙ КОД: ПЕРЕКЛЮЧАТЕЛЬ ТЕМЫ ---
-        window.addEventListener('keydown', (e) => {
-            // Не переключать тему, если пользователь печатает в терминале
-            if (document.activeElement === termInput) {
-                return;
-            }
-            // Переключаем по клавише 'T'
-            if (e.key.toLowerCase() === 't') {
+        
+        // НОВЫЙ КОД: ПЕРЕКЛЮЧАТЕЛЬ ТЕМЫ ПО КЛИКУ НА ССЫЛКУ
+        const themeToggle = document.getElementById('theme-toggle');
+        if (themeToggle) {
+            themeToggle.addEventListener('click', function(e) {
+                e.preventDefault(); // Отменяем стандартное действие ссылки
                 document.body.classList.toggle('light-mode');
-            }
-        });
+            });
+        }
+
 
         window.initExperience = initExperience;
         window.openTerminal = openTerminal;
