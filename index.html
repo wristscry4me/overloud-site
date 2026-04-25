@@ -105,14 +105,20 @@
         .content-wrapper { display: flex; flex-direction: column; align-items: center; z-index: 10; position: relative; }
         
         .om-logo {
-            width: 300px; height: 300px; margin-bottom: 2rem;
+            width: 300px; height: 300px;
             z-index: 10; animation: breathe 4s infinite alternate;
         }
         
         @keyframes breathe { 0% { transform: scale(0.95); opacity: 0.8; } 100% { transform: scale(1.05); } }
-        .brand { font-size: 4rem; font-weight: 700; letter-spacing: 0.5rem; margin: 0; mix-blend-mode: exclusion; text-align: center; }
-        .manifesto { margin-top: 2rem; letter-spacing: 0.2rem; font-weight: 400; color: var(--text-color-muted); text-align: center; max-width: 600px; text-shadow: 0 0 5px var(--bg-color); }
         
+        /* СТИЛИ ДЛЯ НОВОГО ЛОГО-КАРТИНКИ */
+        .brand-logo {
+            height: 60px; /* Можете настроить высоту */
+            width: auto;
+            mix-blend-mode: exclusion;
+            margin-top: 1rem;
+        }
+
         #roster-section::before {
             content: '';
             position: absolute; top: 50%; left: 50%;
@@ -225,13 +231,10 @@
         <video id="bg-video" src="bg_video.mp4" autoplay loop muted playsinline></video>
         <div class="video-overlay"></div>
         
+        <!-- ИЗМЕНЕННЫЙ БЛОК: УБРАН ТЕКСТ И КНОПКА, ДОБАВЛЕНО ЛОГО -->
         <div class="content-wrapper">
             <div id="om-container" class="om-logo"></div>
-            <h1 class="brand">ОВЕРЛАУД</h1>
-            <div class="manifesto" id="scramble-text">
-                ПЛОТЬ ДЫШИТ. ПРИЧИНЫ НЕТ. СЛЕДСТВИЯ НЕТ. МЫ СМОТРИМ.
-            </div>
-            <button class="btn" onclick="openTerminal()">Вход в квартиру (ARG)</button>
+            <img src="over.png" alt="Overloud Logo" class="brand-logo">
         </div>
     </div>
 
@@ -312,7 +315,6 @@
     <script>
     document.addEventListener('DOMContentLoaded', function () {
         
-        // --- ЧИСТАЯ, НЕ СЖАТАЯ ВЕРСИЯ JS ---
         const chromeMaterial = new THREE.ShaderMaterial({
             uniforms: { time: { value: 0 } },
             vertexShader: `varying vec3 vNormal; varying vec3 vViewPosition; varying vec3 vWorldPosition; void main() { vec4 worldPos = modelMatrix * vec4(position, 1.0); vWorldPosition = worldPos.xyz; vec4 mvPosition = viewMatrix * worldPos; vViewPosition = -mvPosition.xyz; vNormal = normalize(normalMatrix * normal); gl_Position = projectionMatrix * mvPosition; }`,
@@ -510,20 +512,9 @@
             }
             requestAnimationFrame(animateFlesh);
         }
-        const textElement=document.getElementById("scramble-text"),originalText=textElement.innerText;
-        function glitchText(){
-            if(Math.random()>0.9){
-                const glitchChars="ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()";
-                let currentText=originalText.split("");
-                let breaks=Math.floor(Math.random()*4)+2;
-                for(let i=0;i<breaks;i++){
-                    let idx=Math.floor(Math.random()*currentText.length);
-                    if(currentText[idx]!==" ")currentText[idx]=glitchChars[Math.floor(Math.random()*glitchChars.length)];
-                }
-                textElement.innerText=currentText.join("");
-            }else textElement.innerText=originalText;
-            setTimeout(glitchText,Math.random()*200+50);
-        }
+        
+        // ФУНКЦИЯ GLITCHTEXT УДАЛЕНА
+
         const rosterItems=document.querySelectorAll(".roster-item"),dynamicBg=document.getElementById("dynamic-bg");
         let hoverAudio=new Audio;
         rosterItems.forEach(item=>{
@@ -570,12 +561,15 @@
                 document.body.classList.toggle("light-mode");
             });
         }
+        
         window.openTerminal=openTerminal;
         window.closeTerminal=closeTerminal;
+        
         initLoader3D();
         initMain3DObject();
         animateFlesh();
-        glitchText();
+        // ВЫЗОВ GLITCHTEXT УДАЛЕН
+
     });
     </script>
 </body>
