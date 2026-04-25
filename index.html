@@ -10,7 +10,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;900&display=swap" rel="stylesheet">
 
     <style>
-        /* --- ВАШ ОРИГИНАЛЬНЫЙ CSS, БЕЗ ИЗМЕНЕНИЙ --- */
+        /* --- ВАШ CSS --- */
         :root {
             --bg-color: #030303;
             --text-color: #e0e0e0;
@@ -85,17 +85,15 @@
         }
         .content-wrapper { display: flex; flex-direction: column; align-items: center; z-index: 10; position: relative; }
         
-        /* --- Я ИЗМЕНИЛ ТОЛЬКО ЭТОТ БЛОК В CSS --- */
         .om-logo {
             width: 300px;
             height: 300px;
             margin-bottom: 2rem;
             z-index: 10;
-            animation: breathe 4s infinite alternate; /* Сохраняем вашу анимацию */
+            animation: breathe 4s infinite alternate;
         }
-        /* --- КОНЕЦ МОИХ ИЗМЕНЕНИЙ В CSS --- */
         
-        @keyframes breathe { 0% { transform: scale(0.95); opacity: 0.8; } 100% { transform: scale(1.05); text-shadow: 0 0 50px #ff0000; } }
+        @keyframes breathe { 0% { transform: scale(0.95); opacity: 0.8; } 100% { transform: scale(1.05); } }
         .brand { font-size: 4rem; font-weight: 900; letter-spacing: 0.5rem; margin: 0; mix-blend-mode: exclusion; text-align: center; }
         .manifesto { margin-top: 2rem; letter-spacing: 0.2rem; font-weight: 600; color: #888; text-align: center; max-width: 600px; text-shadow: 0 0 5px #000; }
         .roster-title { font-size: 1rem; letter-spacing: 1rem; font-weight: 600; color: var(--flesh-red); margin-bottom: 3rem; text-transform: uppercase; text-align: center;}
@@ -180,7 +178,6 @@
         <div class="video-overlay"></div>
         
         <div class="content-wrapper">
-            <!-- Я ЗАМЕНИЛ СИМВОЛ НА КОНТЕЙНЕР ДЛЯ 3D -->
             <div id="om-container" class="om-logo"></div>
             <h1 class="brand">ОВЕРЛАУД</h1>
             <div class="manifesto" id="scramble-text">
@@ -263,15 +260,13 @@
         <button class="btn" onclick="closeTerminal()" style="margin-top: 50px; font-size: 0.6rem; border: none;">[Х] ПРЕРВАТЬ</button>
     </div>
 
-    <!-- Я ДОБАВИЛ СКРИПТЫ ДЛЯ 3D ПЕРЕД ВАШИМ ОСНОВНЫМ СКРИПТОМ -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/OBJLoader.js"></script>
 
     <script>
-    // Я ОБЕРНУЛ ВЕСЬ ВАШ КОД В ЭТОТ БЛОК, ЧТОБЫ ИСПРАВИТЬ "БЕЛЫЙ ЭКРАН"
     document.addEventListener('DOMContentLoaded', function () {
 
-        // --- ФУНКЦИЯ ДЛЯ 3D, КОТОРУЮ Я ДОБАВИЛ ---
+        // --- ИЗМЕНЕННАЯ ФУНКЦИЯ ДЛЯ 3D ---
         function init3DObject() {
             const container = document.getElementById('om-container');
             if (!container) return;
@@ -283,22 +278,44 @@
             const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
             renderer.setSize(container.clientWidth, container.clientHeight);
             container.appendChild(renderer.domElement);
-
+            
             const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
             scene.add(ambientLight);
 
-            const pointLight = new THREE.PointLight(0x8b0000, 1.5, 100);
-            pointLight.position.set(0, 3, 4);
-            scene.add(pointLight);
-
             let model;
+            let rainbowMaterial;
+
             const loader = new THREE.OBJLoader();
             loader.load('om.obj', function (object) {
-                const material = new THREE.MeshStandardMaterial({
-                    color: 0x222222, metalness: 0.8, roughness: 0.4,
-                    emissive: 0x8b0000, emissiveIntensity: 0.4
+                
+                rainbowMaterial = new THREE.ShaderMaterial({
+                    uniforms: {
+                        time: { value: 1.0 }
+                    },
+                    vertexShader: `
+                        varying vec2 vUv;
+                        void main() {
+                            vUv = uv;
+                            gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+                        }
+                    `,
+                    fragmentShader: `
+                        uniform float time;
+                        varying vec2 vUv;
+                        void main() {
+                            vec3 color;
+                            color.r = sin(vUv.y * 4.0 + time * 2.0) * 0.5 + 0.5;
+                            color.g = sin(vUv.y * 4.0 + time * 2.0 + 2.094) * 0.5 + 0.5;
+                            color.b = sin(vUv.y * 4.0 + time * 2.0 + 4.188) * 0.5 + 0.5;
+                            gl_FragColor = vec4(color, 1.0);
+                        }
+                    `
                 });
-                object.traverse(child => { if (child.isMesh) child.material = material; });
+
+                object.traverse(child => { 
+                    if (child.isMesh) child.material = rainbowMaterial;
+                });
+
                 const box = new THREE.Box3().setFromObject(object);
                 const center = box.getCenter(new THREE.Vector3());
                 object.position.sub(center);
@@ -309,83 +326,64 @@
 
             function animate() {
                 requestAnimationFrame(animate);
+                if (rainbowMaterial) {
+                    rainbowMaterial.uniforms.time.value += 0.02;
+                }
                 if (model) {
-                    model.rotation.y += 0.005;
-                    model.rotation.x += 0.001;
+                    model.rotation.y += 0.05; // Быстрое вращение по горизонтали
                 }
                 renderer.render(scene, camera);
             }
             animate();
         }
 
-        // --- ВАШ ОРИГИНАЛЬНЫЙ КОД (ВСЕ 400+ СТРОК) ---
+        // --- ВАШ ОРИГИНАЛЬНЫЙ КОД ---
         let audioCtx, osc, gainNode, distortionNode;
         const enderAudio = document.getElementById('ender-audio');
         let isInitiated = false;
-
         const MAX_AMBIENT_VOL = 0.4;
         const MAX_DRONE_VOL = 0.05;
 
         async function initExperience() {
             document.getElementById('init-screen').style.display = 'none';
             isInitiated = true;
-            
             enderAudio.volume = 0;
             enderAudio.play().catch(e => console.error("Ошибка аудио:", e));
-
             audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             osc = audioCtx.createOscillator();
             gainNode = audioCtx.createGain();
             distortionNode = audioCtx.createWaveShaper();
-
             osc.type = 'triangle';
             osc.frequency.setValueAtTime(55, audioCtx.currentTime);
-            
             distortionNode.curve = makeDistortionCurve(0);
             distortionNode.oversample = '4x';
             gainNode.gain.setValueAtTime(MAX_DRONE_VOL, audioCtx.currentTime);
-
             osc.connect(distortionNode);
             distortionNode.connect(gainNode);
             gainNode.connect(audioCtx.destination);
             osc.start();
-
             updateAudioVolumes();
         }
 
         function updateAudioVolumes() {
             if (!isInitiated) return;
-
             if (document.getElementById('terminal').style.display === 'flex') {
                 enderAudio.volume = MAX_AMBIENT_VOL;
                 if (gainNode) gainNode.gain.setTargetAtTime(0, audioCtx.currentTime, 0.1);
                 return;
             }
-
             let scrollTop = window.scrollY || document.documentElement.scrollTop;
-            
-            let docHeight = Math.max(
-                document.body.scrollHeight, document.documentElement.scrollHeight,
-                document.body.offsetHeight, document.documentElement.offsetHeight,
-                document.body.clientHeight, document.documentElement.clientHeight
-            ) - window.innerHeight;
-
+            let docHeight = Math.max(document.body.scrollHeight, document.documentElement.scrollHeight, document.body.offsetHeight, document.documentElement.offsetHeight, document.body.clientHeight, document.documentElement.clientHeight) - window.innerHeight;
             let scrollPercent = 0;
-            if (docHeight > 0) {
-                scrollPercent = scrollTop / docHeight;
-            }
-            
+            if (docHeight > 0) { scrollPercent = scrollTop / docHeight; }
             scrollPercent = Math.max(0, Math.min(1, scrollPercent));
-
             enderAudio.volume = scrollPercent * MAX_AMBIENT_VOL;
-
             if (gainNode) {
                 let currentDroneVol = MAX_DRONE_VOL * (1 - scrollPercent);
                 currentDroneVol = Math.max(0.002, currentDroneVol);
                 gainNode.gain.setTargetAtTime(currentDroneVol, audioCtx.currentTime, 0.1);
             }
         }
-
         window.addEventListener('scroll', updateAudioVolumes);
 
         function makeDistortionCurve(amount) {
@@ -417,7 +415,7 @@
         const filterNoise = document.getElementById('noise-anim');
         let phase = 0;
         function animateFlesh() { 
-            if(filterNoise) { // Добавил проверку, чтобы не было ошибок
+            if(filterNoise) {
                 phase += 0.05; 
                 filterNoise.setAttribute('baseFrequency', `0.01 ${0.1 + Math.sin(phase) * 0.05}`); 
             }
@@ -442,7 +440,6 @@
         const rosterItems = document.querySelectorAll('.roster-item');
         const dynamicBg = document.getElementById('dynamic-bg');
         let hoverAudio = new Audio();
-
         rosterItems.forEach(item => {
             item.addEventListener('mouseenter', () => {
                 const bgPath = item.getAttribute('data-bg'); if(bgPath) { dynamicBg.style.backgroundImage = `url(${bgPath})`; dynamicBg.style.opacity = 1; }
@@ -485,17 +482,15 @@
             }
         });
 
-        // Делаем ваши функции глобальными, чтобы onclick в HTML их видел
         window.initExperience = initExperience;
         window.openTerminal = openTerminal;
         window.closeTerminal = closeTerminal;
 
-        // Запускаем все, что должно работать сразу
         init3DObject();
         animateFlesh();
         glitchText();
 
-    }); // <-- Закрываем `DOMContentLoaded`
+    });
     </script>
 </body>
 </html>
