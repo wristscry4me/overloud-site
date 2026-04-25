@@ -7,43 +7,41 @@
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <!-- Подключаем новый шрифт Roboto Mono -->
-    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <!-- НОВЫЙ ШРИФТ OXANIUM -->
+    <link href="https://fonts.googleapis.com/css2?family=Oxanium:wght@400;700&display=swap" rel="stylesheet">
 
     <style>
         :root {
-            /* Темная тема по умолчанию (монохром) */
             --bg-color: #030303;
             --bg-color-footer: #010101;
             --text-color: #e0e0e0;
             --text-color-muted: #666;
-            --accent-color: var(--text-color); /* Акцентный цвет теперь просто белый */
+            --accent-color: var(--text-color);
             --border-color: #222;
         }
 
         body.light-mode {
-            /* Светлая тема */
             --bg-color: #f0f0f0;
             --bg-color-footer: #e5e5e5;
             --text-color: #1a1a1a;
             --text-color-muted: #777;
-            --accent-color: var(--text-color); /* Акцентный цвет теперь просто черный */
+            --accent-color: var(--text-color);
             --border-color: #d0d0d0;
         }
 
         body, html {
             margin: 0; padding: 0; width: 100%; 
             background-color: var(--bg-color); color: var(--text-color);
-            /* Новый шрифт */
-            font-family: 'Roboto Mono', 'Inter', monospace;
+            /* НОВЫЙ ШРИФТ */
+            font-family: 'Oxanium', 'Roboto Mono', 'Inter', monospace;
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
             text-rendering: optimizeLegibility;
             overflow-x: hidden; 
-            cursor: default; /* Обычный курсор */
+            cursor: default;
             transition: background-color 0.3s, color 0.3s;
         }
-        a, button, .roster-item { cursor: pointer; } /* Курсор-палец для интерактивных элементов */
+        a, button, .roster-item { cursor: pointer; }
         
         a { text-decoration: none; color: inherit; }
         .navbar {
@@ -52,9 +50,13 @@
             gap: 30px; z-index: 100; box-sizing: border-box;
             mix-blend-mode: exclusion; pointer-events: none;
         }
+        /* ИСПРАВЛЕНИЕ ВИДИМОСТИ В СВЕТЛОЙ ТЕМЕ */
+        body.light-mode .navbar {
+            mix-blend-mode: normal;
+        }
         .nav-link {
             pointer-events: auto; font-size: 0.75rem; letter-spacing: 0.2rem; text-transform: uppercase;
-            font-weight: 700; /* Сделал шрифт жирнее */
+            font-weight: 700;
             transition: color 0.2s, transform 0.2s; width: max-content;
         }
         .nav-link:hover { color: var(--accent-color); text-shadow: 0 0 10px var(--accent-color); transform: translateX(10px); }
@@ -78,14 +80,7 @@
         }
         @keyframes pulseText { 0%, 100% { opacity: 0.3; } 50% { opacity: 1; } }
         
-        /* Эффект от курсора без символов */
-        .trail-drop {
-            position: fixed; background: var(--text-color);
-            width: 4px; height: 4px; border-radius: 50%;
-            pointer-events: none; z-index: 999;
-            animation: fadeDrop 1s forwards; mix-blend-mode: exclusion;
-        }
-        @keyframes fadeDrop { 0% { opacity: 1; transform: scale(1); } 100% { opacity: 0; transform: scale(5) translateY(20px); } }
+        /* СТИЛИ СЛЕДА ОТ МЫШИ ПОЛНОСТЬЮ УДАЛЕНЫ */
 
         .section {
             min-height: 100vh; display: flex; flex-direction: column;
@@ -177,12 +172,12 @@
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
             background: rgba(0,0,0,0.95); z-index: 2000; display: none;
             flex-direction: column; justify-content: center; align-items: center;
-            font-family: 'Roboto Mono', monospace; color: var(--text-color);
+            font-family: 'Oxanium', monospace; color: var(--text-color);
         }
         #term-input {
             background: transparent; border: none; border-bottom: 1px solid var(--text-color);
             color: #fff; font-size: 2rem; text-align: center; outline: none; text-transform: uppercase;
-            font-family: 'Roboto Mono', monospace; width: 300px; letter-spacing: 0.5rem; margin-top: 2rem;
+            font-family: 'Oxanium', monospace; width: 300px; letter-spacing: 0.5rem; margin-top: 2rem;
         }
     </style>
 </head>
@@ -208,7 +203,6 @@
         <a href="artists.html" class="nav-link">АРТИСТЫ</a>
         <a href="merch.html" class="nav-link">МЕРЧ</a>
         <a href="#footer" class="nav-link">СВЯЗЬ / DEMO</a>
-        <!-- КНОПКА СМЕНЫ ТЕМЫ -->
         <a href="#" id="theme-toggle" class="nav-link">ТЕМА</a>
     </nav>
 
@@ -481,20 +475,11 @@
             return curve;
         }
 
+        // УБРАН ВИЗУАЛЬНЫЙ СЛЕД ОТ МЫШИ
         document.addEventListener('mousemove', (e) => {
             if (audioCtx && distortionNode && gainNode.gain.value > 0.01) {
                 let speed = Math.abs(e.movementX) + Math.abs(e.movementY);
                 distortionNode.curve = makeDistortionCurve(Math.min(speed * 2, 400));
-            }
-            // УБРАН БЛОК С СИМВОЛАМИ, НО СОЗДАНИЕ ТОЧЕК-СЛЕДОВ ОСТАЛОСЬ
-            if (Math.random() > 0.5) {
-                let drop = document.createElement('div');
-                drop.classList.add('trail-drop');
-                // drop.innerText - убрано, теперь это просто точка из CSS
-                drop.style.left = e.clientX + 'px';
-                drop.style.top = e.clientY + 'px';
-                document.body.appendChild(drop);
-                setTimeout(() => drop.remove(), 1000);
             }
         });
 
@@ -569,15 +554,14 @@
             }
         });
         
-        // НОВЫЙ КОД: ПЕРЕКЛЮЧАТЕЛЬ ТЕМЫ ПО КЛИКУ НА ССЫЛКУ
+        // ПЕРЕКЛЮЧАТЕЛЬ ТЕМЫ ПО КЛИКУ НА ССЫЛКУ
         const themeToggle = document.getElementById('theme-toggle');
         if (themeToggle) {
             themeToggle.addEventListener('click', function(e) {
-                e.preventDefault(); // Отменяем стандартное действие ссылки
+                e.preventDefault();
                 document.body.classList.toggle('light-mode');
             });
         }
-
 
         window.initExperience = initExperience;
         window.openTerminal = openTerminal;
