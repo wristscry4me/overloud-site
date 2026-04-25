@@ -113,33 +113,23 @@
         .brand { font-size: 4rem; font-weight: 700; letter-spacing: 0.5rem; margin: 0; mix-blend-mode: exclusion; text-align: center; }
         .manifesto { margin-top: 2rem; letter-spacing: 0.2rem; font-weight: 400; color: var(--text-color-muted); text-align: center; max-width: 600px; text-shadow: 0 0 5px var(--bg-color); }
         
-        /* --- ИСПРАВЛЕННЫЕ СТИЛИ --- */
         #roster-section::before {
             content: '';
-            position: absolute;
-            top: 50%; left: 50%;
+            position: absolute; top: 50%; left: 50%;
             transform: translate(-50%, -50%);
             width: 70vw; height: 70vh;
             background-image: url('111111.png');
-            background-size: contain;
-            background-repeat: no-repeat;
-            background-position: center;
-            opacity: 0.05;
-            filter: grayscale(100%);
-            z-index: 1; /* Ставим СРАЗУ ЗА контентом, а не за всей секцией */
+            background-size: contain; background-repeat: no-repeat; background-position: center;
+            opacity: 0.05; filter: grayscale(100%);
+            z-index: 1; 
         }
         body.light-mode #roster-section::before {
             filter: grayscale(100%) invert(1);
         }
         .roster-content-wrapper {
-            position: relative; /* Чтобы контент был над фоном */
-            z-index: 2;
-            width: 100%;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+            position: relative; z-index: 2; width: 100%;
+            display: flex; flex-direction: column; align-items: center;
         }
-        /* --- КОНЕЦ ИСПРАВЛЕНИЙ --- */
 
         .roster-title { font-size: 1rem; letter-spacing: 1rem; font-weight: 700; color: var(--accent-color); margin-bottom: 3rem; text-transform: uppercase; text-align: center; }
         .roster-list { list-style: none; padding: 0; text-align: center; width: 100%; margin-bottom: 2rem; }
@@ -167,10 +157,8 @@
         .merch-item:hover .merch-img-placeholder { filter: grayscale(0%) invert(1); }
         
         .btn {
-            position: relative;
-            display: inline-block; margin-top: 2rem; padding: 15px 5px;
-            background: transparent; color: var(--text-color);
-            border: none;
+            position: relative; display: inline-block; margin-top: 2rem; padding: 15px 5px;
+            background: transparent; color: var(--text-color); border: none;
             font-size: 0.8rem; font-weight: 700; letter-spacing: 0.3rem; text-transform: uppercase;
             transition: all 0.2s; z-index: 20; text-align: center;
         }
@@ -247,7 +235,6 @@
         </div>
     </div>
 
-    <!-- ИСПРАВЛЕННАЯ СЕКЦИЯ: КОНТЕНТ ОБЕРНУТ В DIV -->
     <div class="section" id="roster-section">
         <div class="roster-content-wrapper">
             <div class="roster-title">СИМБИОНТЫ</div>
@@ -324,10 +311,271 @@
 
     <script>
     document.addEventListener('DOMContentLoaded', function () {
-        // СКРИПТЫ БЕЗ ИЗМЕНЕНИЙ, ПРОСТО СКОПИРОВАНЫ
-        const chromeMaterial=new THREE.ShaderMaterial({uniforms:{time:{value:0}},vertexShader:"varying vec3 vNormal; varying vec3 vViewPosition; varying vec3 vWorldPosition; void main() { vec4 worldPos = modelMatrix * vec4(position, 1.0); vWorldPosition = worldPos.xyz; vec4 mvPosition = viewMatrix * worldPos; vViewPosition = -mvPosition.xyz; vNormal = normalize(normalMatrix * normal); gl_Position = projectionMatrix * mvPosition; }",fragmentShader:"uniform float time; varying vec3 vNormal; varying vec3 vViewPosition; varying vec3 vWorldPosition; vec3 hsv2rgb(vec3 c) { vec4 K = vec4(1.0, 2.0/3.0, 1.0/3.0, 3.0); vec3 p = abs(fract(c.xxx + K.xyz) * 6.0 - K.www); return c.z * mix(K.xxx, clamp(p - K.xxx, 0.0, 1.0), c.y); } void main() { vec3 normal = normalize(vNormal); vec3 viewDir = normalize(vViewPosition); vec3 reflectDir = reflect(-viewDir, normal); float fresnel = pow(1.0 - max(dot(viewDir, normal), 0.0), 2.0); float hue = atan(reflectDir.y, reflectDir.x) / (2.0 * 3.14159) + 0.5; hue += reflectDir.z * 0.3; hue += time * 0.15; hue = fract(hue); float hue2 = fract(hue + normal.x * 0.2 + normal.y * 0.1 + time * 0.1); vec3 rainbowColor = hsv2rgb(vec3(hue2, 0.9, 1.0)); float specular = pow(max(dot(reflectDir, viewDir), 0.0), 64.0); vec3 specColor = vec3(1.0, 1.0, 1.0) * specular * 2.0; vec3 silver = vec3(0.8, 0.8, 0.85); vec3 color = mix(silver, rainbowColor, 0.75); color += specColor; color = mix(color, vec3(1.0), fresnel * 0.4); float shimmer = sin(vWorldPosition.x * 5.0 + time * 3.0) * cos(vWorldPosition.y * 5.0 + time * 2.0) * sin(vWorldPosition.z * 5.0 + time * 4.0); shimmer = shimmer * 0.5 + 0.5; float hue3 = fract(hue + shimmer * 0.3 + time * 0.05); vec3 shimmerColor = hsv2rgb(vec3(hue3, 1.0, 1.0)); color += shimmerColor * shimmer * 0.3; gl_FragColor = vec4(color, 1.0); }",side:THREE.DoubleSide,});function initLoader3D(){const e=document.getElementById("loader-om-container");if(!e)return;const o=new THREE.WebGLRenderer({antialias:!0,alpha:!0});o.setSize(e.clientWidth,e.clientHeight);e.appendChild(o.domElement);const t=new THREE.Scene,a=8,n=e.clientWidth/e.clientHeight,r=new THREE.OrthographicCamera(a*n/-2,a*n/2,a/2,a/-2,.1,1e3);r.position.set(0,0,5),r.lookAt(t.position);let i;const l=new THREE.OBJLoader;l.load("om.obj",function(e){e.traverse(e=>{e.isMesh&&(e.material=chromeMaterial)});const o=new THREE.Box3().setFromObject(e),t=o.getCenter(new THREE.Vector3);e.position.sub(t),e.scale.set(2.5,2.5,2.5),i=e,t.add(i)});const c=new THREE.Clock;!function e(){requestAnimationFrame(e);const t=c.getElapsedTime();chromeMaterial.uniforms.time.value=t,i&&(i.rotation.y+=.02),o.render(t,r)}()}function initMain3DObject(){const e=document.getElementById("om-container");if(!e)return;const o=new THREE.WebGLRenderer({antialias:!0,alpha:!0});o.setSize(e.clientWidth,e.clientHeight),o.setPixelRatio(window.devicePixelRatio),e.appendChild(o.domElement);const t=new THREE.Scene,a=new THREE.PerspectiveCamera(45,e.clientWidth/e.clientHeight,.1,100);a.position.set(0,0,5);const n=new THREE.AmbientLight(16777215,.3);t.add(n);const r=new THREE.DirectionalLight(16711680,1);r.position.set(5,5,5),t.add(r);const i=new THREE.DirectionalLight(255,1);i.position.set(-5,-5,5),t.add(i);const l=new THREE.DirectionalLight(65416,.8);l.position.set(0,5,-5),t.add(l);const c=new THREE.PointLight(16711935,2,20);c.position.set(3,3,3),t.add(c);const d=new THREE.PointLight(65535,2,20);d.position.set(-3,-3,3),t.add(d);let s=null;const m=new THREE.OBJLoader;m.load("om.obj",function(o){o.traverse(e=>{e.isMesh&&(e.material=chromeMaterial,e.geometry.computeVertexNormals())});const a=new THREE.Box3().setFromObject(o),n=a.getCenter(new THREE.Vector3),r=a.getSize(new THREE.Vector3),i=2.5/Math.max(r.x,r.y,r.z);o.position.sub(n.multiplyScalar(i)),o.scale.setScalar(i),t.add(o),s=o,setTimeout(()=>{const e=document.getElementById("loader-screen");e&&(e.classList.add("hidden"),setTimeout(()=>{e.style.display="none"},500)),initExperience()},2e3)},function(e){console.log(e.loaded/e.total*100+"% loaded")},function(e){console.error("Error loading om.obj:",e),setTimeout(()=>{document.getElementById("loader-screen")?.classList.add("hidden"),initExperience()},2e3)}),window.addEventListener("resize",()=>{const o=e.clientWidth,t=e.clientHeight;a.aspect=o/t,a.updateProjectionMatrix(),o.setSize(o,t)});const u=new THREE.Clock;!function e(){requestAnimationFrame(e);const t=u.getElapsedTime();chromeMaterial.uniforms.time.value=t,r.position.x=5*Math.sin(.7*t),r.position.y=5*Math.cos(.5*t),i.position.x=5*Math.cos(.6*t),i.position.y=5*Math.sin(.8*t),c.position.x=4*Math.sin(1.2*t),c.position.z=4*Math.cos(.9*t),d.position.y=4*Math.cos(1.1*t),d.position.z=4*Math.sin(.7*t);const a=.1*t%1,n=(.1*t+.33)%1,p=(.1*t+.66)%1;r.color.setHSL(a,1,.5),i.color.setHSL(n,1,.5),l.color.setHSL(p,1,.5),s&&(s.rotation.y+=.02,s.rotation.x=.15*Math.sin(.3*t)),o.render(t,a)}()}let audioCtx,osc,gainNode,distortionNode;const enderAudio=document.getElementById("ender-audio");let isInitiated=!1;const MAX_AMBIENT_VOL=.4,MAX_DRONE_VOL=.05;async function initExperience(){isInitiated=!0,enderAudio.volume=0,enderAudio.play().catch(e=>console.error("Ошибка аудио:",e)),audioCtx=new(window.AudioContext||window.webkitAudioContext),osc=audioCtx.createOscillator(),gainNode=audioCtx.createGain(),distortionNode=audioCtx.createWaveShaper(),osc.type="triangle",osc.frequency.setValueAtTime(55,audioCtx.currentTime),distortionNode.curve=makeDistortionCurve(0),distortionNode.oversample="4x",gainNode.gain.setValueAtTime(MAX_DRONE_VOL,audioCtx.currentTime),osc.connect(distortionNode),distortionNode.connect(gainNode),gainNode.connect(audioCtx.destination),osc.start(),updateAudioVolumes()}function updateAudioVolumes(){if(isInitiated){if("flex"===document.getElementById("terminal").style.display)return enderAudio.volume=MAX_AMBIENT_VOL,void(gainNode&&gainNode.gain.setTargetAtTime(0,audioCtx.currentTime,.1));let e=window.scrollY||document.documentElement.scrollTop,o=Math.max(document.body.scrollHeight,document.documentElement.scrollHeight,document.body.offsetHeight,document.documentElement.offsetHeight,document.body.clientHeight,document.documentElement.clientHeight)-window.innerHeight,t=0;o>0&&(t=e/o),t=Math.max(0,Math.min(1,t)),enderAudio.volume=t*MAX_AMBIENT_VOL,gainNode&&gainNode.gain.setTargetAtTime(Math.max(.002,MAX_DRONE_VOL*(1-t)),audioCtx.currentTime,.1)}}window.addEventListener("scroll",updateAudioVolumes);function makeDistortionCurve(e){let o="number"==typeof e?e:50,t=new Float32Array(44100);for(let e=0;e<44100;++e){let a=2*e/44100-1;t[e]=(3+o)*a*20*Math.PI/180/(Math.PI+o*Math.abs(a))}return t}document.addEventListener("mousemove",e=>{audioCtx&&distortionNode&&gainNode.gain.value>.01&&(distortionNode.curve=makeDistortionCurve(Math.min(2*(Math.abs(e.movementX)+Math.abs(e.movementY)),400)))});const filterNoise=document.getElementById("noise-anim");let phase=0;function animateFlesh(){filterNoise&&(phase+=.05,filterNoise.setAttribute("baseFrequency","0.01 "+(.1+.05*Math.sin(phase)))),requestAnimationFrame(animateFlesh)}const textElement=document.getElementById("scramble-text"),originalText=textElement.innerText;function glitchText(){if(Math.random()>.9){const e="ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()";let o=originalText.split("");for(let t=0;t<Math.floor(4*Math.random())+2;t++){let a=Math.floor(Math.random()*o.length);" "!==o[a]&&(o[a]=e[Math.floor(Math.random()*e.length)])}textElement.innerText=o.join("")}else textElement.innerText=originalText;setTimeout(glitchText,50+200*Math.random())}const rosterItems=document.querySelectorAll(".roster-item"),dynamicBg=document.getElementById("dynamic-bg");let hoverAudio=new Audio;rosterItems.forEach(e=>{e.addEventListener("mouseenter",()=>{const o=e.getAttribute("data-bg");o&&(dynamicBg.style.backgroundImage=`url(${o})`,dynamicBg.style.opacity=1);const t=e.getAttribute("data-audio");t&&(hoverAudio.src=t,hoverAudio.volume=.5,hoverAudio.play().catch(e=>{}))
-,document.body.style.filter="invert(1) hue-rotate(180deg)"}),e.addEventListener("mouseleave",()=>{dynamicBg.style.opacity=0,hoverAudio.pause(),hoverAudio.currentTime=0,document.body.style.filter="none"})});const terminal=document.getElementById("terminal"),termInput=document.getElementById("term-input"),termError=document.getElementById("term-error");function openTerminal(){terminal.style.display="flex",setTimeout(()=>termInput.focus(),100),updateAudioVolumes()}function closeTerminal(){terminal.style.display="none",termInput.value="",termError.style.opacity=0,updateAudioVolumes()}termInput.addEventListener("keydown",e=>{if("Enter"===e.key){const o=termInput.value.toUpperCase().trim();"СИМБИОЗ"===o||"ENTER"===o?(termInput.style.color="#00ff00",termInput.value="ДОСТУП РАЗРЕШЕН...",setTimeout(()=>{window.location.href="https://t.me/your_secret_channel"},1500)):(termError.style.opacity=1,document.body.style.transform="translate(10px, -10px)",setTimeout(()=>{document.body.style.transform="none"},100),termInput.value="")}});const themeToggle=document.getElementById("theme-toggle");themeToggle&&themeToggle.addEventListener("click",function(e){e.preventDefault(),document.body.classList.toggle("light-mode")}),window.openTerminal=openTerminal,window.closeTerminal=closeTerminal,initLoader3D(),initMain3DObject(),animateFlesh(),glitchText();
+        
+        // --- ЧИСТАЯ, НЕ СЖАТАЯ ВЕРСИЯ JS ---
+        const chromeMaterial = new THREE.ShaderMaterial({
+            uniforms: { time: { value: 0 } },
+            vertexShader: `varying vec3 vNormal; varying vec3 vViewPosition; varying vec3 vWorldPosition; void main() { vec4 worldPos = modelMatrix * vec4(position, 1.0); vWorldPosition = worldPos.xyz; vec4 mvPosition = viewMatrix * worldPos; vViewPosition = -mvPosition.xyz; vNormal = normalize(normalMatrix * normal); gl_Position = projectionMatrix * mvPosition; }`,
+            fragmentShader: `uniform float time; varying vec3 vNormal; varying vec3 vViewPosition; varying vec3 vWorldPosition; vec3 hsv2rgb(vec3 c) { vec4 K = vec4(1.0, 2.0/3.0, 1.0/3.0, 3.0); vec3 p = abs(fract(c.xxx + K.xyz) * 6.0 - K.www); return c.z * mix(K.xxx, clamp(p - K.xxx, 0.0, 1.0), c.y); } void main() { vec3 normal = normalize(vNormal); vec3 viewDir = normalize(vViewPosition); vec3 reflectDir = reflect(-viewDir, normal); float fresnel = pow(1.0 - max(dot(viewDir, normal), 0.0), 2.0); float hue = atan(reflectDir.y, reflectDir.x) / (2.0 * 3.14159) + 0.5; hue += reflectDir.z * 0.3; hue += time * 0.15; hue = fract(hue); float hue2 = fract(hue + normal.x * 0.2 + normal.y * 0.1 + time * 0.1); vec3 rainbowColor = hsv2rgb(vec3(hue2, 0.9, 1.0)); float specular = pow(max(dot(reflectDir, viewDir), 0.0), 64.0); vec3 specColor = vec3(1.0, 1.0, 1.0) * specular * 2.0; vec3 silver = vec3(0.8, 0.8, 0.85); vec3 color = mix(silver, rainbowColor, 0.75); color += specColor; color = mix(color, vec3(1.0), fresnel * 0.4); float shimmer = sin(vWorldPosition.x * 5.0 + time * 3.0) * cos(vWorldPosition.y * 5.0 + time * 2.0) * sin(vWorldPosition.z * 5.0 + time * 4.0); shimmer = shimmer * 0.5 + 0.5; float hue3 = fract(hue + shimmer * 0.3 + time * 0.05); vec3 shimmerColor = hsv2rgb(vec3(hue3, 1.0, 1.0)); color += shimmerColor * shimmer * 0.3; gl_FragColor = vec4(color, 1.0); }`,
+            side:THREE.DoubleSide,
+        });
 
+        function initLoader3D(){
+            const container = document.getElementById("loader-om-container");
+            if(!container) return;
+            const renderer = new THREE.WebGLRenderer({antialias:true,alpha:true});
+            renderer.setSize(container.clientWidth,container.clientHeight);
+            container.appendChild(renderer.domElement);
+            const scene = new THREE.Scene();
+            const frustumSize = 8;
+            const aspect = container.clientWidth/container.clientHeight;
+            const camera = new THREE.OrthographicCamera(frustumSize*aspect/-2,frustumSize*aspect/2,frustumSize/2,frustumSize/-2,0.1,1000);
+            camera.position.set(0,0,5);
+            camera.lookAt(scene.position);
+            
+            let loaderModel;
+            const loader = new THREE.OBJLoader();
+            loader.load("om.obj",function(object){
+                object.traverse(child => { if (child.isMesh) child.material = chromeMaterial; });
+                const box = new THREE.Box3().setFromObject(object);
+                const center = box.getCenter(new THREE.Vector3());
+                object.position.sub(center);
+                object.scale.set(2.5,2.5,2.5);
+                loaderModel = object;
+                scene.add(loaderModel);
+            });
+            const clock = new THREE.Clock();
+            function animate(){
+                requestAnimationFrame(animate);
+                const elapsed = clock.getElapsedTime();
+                chromeMaterial.uniforms.time.value = elapsed;
+                if(loaderModel){
+                    loaderModel.rotation.y += 0.02;
+                }
+                renderer.render(scene, camera);
+            }
+            animate();
+        }
+
+        function initMain3DObject(){
+            const container = document.getElementById("om-container");
+            if(!container) return;
+            const renderer = new THREE.WebGLRenderer({antialias:true,alpha:true});
+            renderer.setSize(container.clientWidth,container.clientHeight);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            container.appendChild(renderer.domElement);
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(45,container.clientWidth/container.clientHeight,0.1,100);
+            camera.position.set(0,0,5);
+            const ambientLight = new THREE.AmbientLight(0xffffff,0.3);
+            scene.add(ambientLight);
+            const dirLight1 = new THREE.DirectionalLight(0xff0000,1);
+            dirLight1.position.set(5,5,5);
+            scene.add(dirLight1);
+            const dirLight2 = new THREE.DirectionalLight(0x0000ff,1);
+            dirLight2.position.set(-5,-5,5);
+            scene.add(dirLight2);
+            const dirLight3 = new THREE.DirectionalLight(0x00ff88,0.8);
+            dirLight3.position.set(0,5,-5);
+            scene.add(dirLight3);
+            const pointLight1 = new THREE.PointLight(0xff00ff,2,20);
+            pointLight1.position.set(3,3,3);
+            scene.add(pointLight1);
+            const pointLight2 = new THREE.PointLight(0x00ffff,2,20);
+            pointLight2.position.set(-3,-3,3);
+            scene.add(pointLight2);
+            
+            let omObject = null;
+            const loader = new THREE.OBJLoader();
+            loader.load("om.obj",
+                function(object){
+                    object.traverse(child => { if (child.isMesh) { child.material = chromeMaterial; child.geometry.computeVertexNormals(); }});
+                    const box = new THREE.Box3().setFromObject(object);
+                    const center = box.getCenter(new THREE.Vector3());
+                    const size = box.getSize(new THREE.Vector3());
+                    const maxDim = Math.max(size.x,size.y,size.z);
+                    const scale = 2.5/maxDim;
+                    object.position.sub(center.multiplyScalar(scale));
+                    object.scale.setScalar(scale);
+                    scene.add(object);
+                    omObject = object;
+
+                    setTimeout(()=>{
+                        const loaderScreen = document.getElementById("loader-screen");
+                        if(loaderScreen){
+                            loaderScreen.classList.add("hidden");
+                            setTimeout(()=>{loaderScreen.style.display="none"},500);
+                        }
+                        initExperience();
+                    }, 2000);
+                },
+                function(xhr){ console.log((xhr.loaded/xhr.total*100)+"% loaded"); },
+                function(error){ 
+                    console.error("Error loading om.obj:", error);
+                    setTimeout(()=>{
+                        const loaderScreen = document.getElementById("loader-screen");
+                        if (loaderScreen) loaderScreen.classList.add("hidden");
+                        initExperience();
+                    }, 2000);
+                }
+            );
+
+            window.addEventListener("resize",()=>{
+                const w = container.clientWidth; const h = container.clientHeight;
+                camera.aspect = w/h; camera.updateProjectionMatrix(); renderer.setSize(w,h);
+            });
+            const clock = new THREE.Clock();
+            function animate(){
+                requestAnimationFrame(animate);
+                const elapsed = clock.getElapsedTime();
+                chromeMaterial.uniforms.time.value = elapsed;
+                dirLight1.position.x = Math.sin(elapsed * 0.7) * 5;
+                dirLight1.position.y = Math.cos(elapsed * 0.5) * 5;
+                dirLight2.position.x = Math.cos(elapsed * 0.6) * 5;
+                dirLight2.position.y = Math.sin(elapsed * 0.8) * 5;
+                pointLight1.position.x = Math.sin(elapsed * 1.2) * 4;
+                pointLight1.position.z = Math.cos(elapsed * 0.9) * 4;
+                pointLight2.position.y = Math.cos(elapsed * 1.1) * 4;
+                pointLight2.position.z = Math.sin(elapsed * 0.7) * 4;
+                const h1 = (elapsed * 0.1)%1; const h2 = (elapsed * 0.1+0.33)%1; const h3 = (elapsed * 0.1+0.66)%1;
+                dirLight1.color.setHSL(h1,1,0.5); dirLight2.color.setHSL(h2,1,0.5); dirLight3.color.setHSL(h3,1,0.5);
+                if(omObject){
+                    omObject.rotation.y += 0.02;
+                    omObject.rotation.x = Math.sin(elapsed * 0.3) * 0.15;
+                }
+                renderer.render(scene, camera);
+            }
+            animate();
+        }
+        
+        let audioCtx,osc,gainNode,distortionNode;
+        const enderAudio = document.getElementById("ender-audio");
+        let isInitiated = false;
+        const MAX_AMBIENT_VOL = 0.4;
+        const MAX_DRONE_VOL = 0.05;
+        async function initExperience(){
+            isInitiated = true;
+            enderAudio.volume=0;
+            enderAudio.play().catch(e=>console.error("Ошибка аудио:",e));
+            audioCtx = new(window.AudioContext||window.webkitAudioContext);
+            osc=audioCtx.createOscillator();
+            gainNode=audioCtx.createGain();
+            distortionNode=audioCtx.createWaveShaper();
+            osc.type="triangle";
+            osc.frequency.setValueAtTime(55,audioCtx.currentTime);
+            distortionNode.curve=makeDistortionCurve(0);
+            distortionNode.oversample="4x";
+            gainNode.gain.setValueAtTime(MAX_DRONE_VOL,audioCtx.currentTime);
+            osc.connect(distortionNode);
+            distortionNode.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            osc.start();
+            updateAudioVolumes();
+        }
+        function updateAudioVolumes(){
+            if(!isInitiated) return;
+            if(document.getElementById("terminal").style.display==="flex"){
+                enderAudio.volume=MAX_AMBIENT_VOL;
+                if(gainNode) gainNode.gain.setTargetAtTime(0,audioCtx.currentTime,0.1);
+                return;
+            }
+            let scrollTop=window.scrollY||document.documentElement.scrollTop;
+            let docHeight=Math.max(document.body.scrollHeight,document.documentElement.scrollHeight,document.body.offsetHeight,document.documentElement.offsetHeight,document.body.clientHeight,document.documentElement.clientHeight)-window.innerHeight;
+            let scrollPercent=0;
+            if(docHeight>0){scrollPercent=scrollTop/docHeight;}
+            scrollPercent=Math.max(0,Math.min(1,scrollPercent));
+            enderAudio.volume=scrollPercent*MAX_AMBIENT_VOL;
+            if(gainNode){
+                let currentDroneVol = MAX_DRONE_VOL*(1-scrollPercent);
+                currentDroneVol=Math.max(0.002,currentDroneVol);
+                gainNode.gain.setTargetAtTime(currentDroneVol,audioCtx.currentTime,0.1);
+            }
+        }
+        window.addEventListener("scroll",updateAudioVolumes);
+        function makeDistortionCurve(amount){
+            let k="number"===typeof amount?amount:50, n_samples=44100, curve=new Float32Array(n_samples);
+            for(let i=0;i<n_samples;++i){
+                let x=i*2/n_samples-1;
+                curve[i]=(3+k)*x*20*(Math.PI/180)/(Math.PI+k*Math.abs(x));
+            }
+            return curve;
+        }
+        document.addEventListener("mousemove",e=>{if(audioCtx&&distortionNode&&gainNode.gain.value>0.01){let speed=Math.abs(e.movementX)+Math.abs(e.movementY);distortionNode.curve=makeDistortionCurve(Math.min(speed*2,400));}});
+        const filterNoise=document.getElementById("noise-anim");
+        let phase=0;
+        function animateFlesh(){
+            if(filterNoise){
+                phase+=0.05;
+                filterNoise.setAttribute("baseFrequency",`0.01 ${0.1+Math.sin(phase)*0.05}`);
+            }
+            requestAnimationFrame(animateFlesh);
+        }
+        const textElement=document.getElementById("scramble-text"),originalText=textElement.innerText;
+        function glitchText(){
+            if(Math.random()>0.9){
+                const glitchChars="ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()";
+                let currentText=originalText.split("");
+                let breaks=Math.floor(Math.random()*4)+2;
+                for(let i=0;i<breaks;i++){
+                    let idx=Math.floor(Math.random()*currentText.length);
+                    if(currentText[idx]!==" ")currentText[idx]=glitchChars[Math.floor(Math.random()*glitchChars.length)];
+                }
+                textElement.innerText=currentText.join("");
+            }else textElement.innerText=originalText;
+            setTimeout(glitchText,Math.random()*200+50);
+        }
+        const rosterItems=document.querySelectorAll(".roster-item"),dynamicBg=document.getElementById("dynamic-bg");
+        let hoverAudio=new Audio;
+        rosterItems.forEach(item=>{
+            item.addEventListener("mouseenter",()=>{
+                const bgPath=item.getAttribute("data-bg");
+                if(bgPath){dynamicBg.style.backgroundImage=`url(${bgPath})`;dynamicBg.style.opacity=1;}
+                const audioPath=item.getAttribute("data-audio");
+                if(audioPath){hoverAudio.src=audioPath;hoverAudio.volume=0.5;hoverAudio.play().catch(e=>{});}
+                document.body.style.filter="invert(1) hue-rotate(180deg)";
+            });
+            item.addEventListener("mouseleave",()=>{dynamicBg.style.opacity=0;hoverAudio.pause();hoverAudio.currentTime=0;document.body.style.filter="none";});
+        });
+        const terminal=document.getElementById("terminal"),termInput=document.getElementById("term-input"),termError=document.getElementById("term-error");
+        function openTerminal(){
+            terminal.style.display="flex";
+            setTimeout(()=>termInput.focus(),100);
+            updateAudioVolumes();
+        }
+        function closeTerminal(){
+            terminal.style.display="none";
+            termInput.value="";
+            termError.style.opacity=0;
+            updateAudioVolumes();
+        }
+        termInput.addEventListener("keydown",e=>{
+            if(e.key==="Enter"){
+                const password=termInput.value.toUpperCase().trim();
+                if(password==="СИМБИОЗ"||password==="ENTER"){
+                    termInput.style.color="#00ff00";
+                    termInput.value="ДОСТУП РАЗРЕШЕН...";
+                    setTimeout(()=>{window.location.href="https://t.me/your_secret_channel";},1500);
+                }else{
+                    termError.style.opacity=1;
+                    document.body.style.transform="translate(10px, -10px)";
+                    setTimeout(()=>{document.body.style.transform="none";},100);
+                    termInput.value="";
+                }
+            }
+        });
+        const themeToggle=document.getElementById("theme-toggle");
+        if(themeToggle){
+            themeToggle.addEventListener("click",function(e){
+                e.preventDefault();
+                document.body.classList.toggle("light-mode");
+            });
+        }
+        window.openTerminal=openTerminal;
+        window.closeTerminal=closeTerminal;
+        initLoader3D();
+        initMain3DObject();
+        animateFlesh();
+        glitchText();
     });
     </script>
 </body>
