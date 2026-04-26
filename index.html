@@ -111,13 +111,12 @@
         
         @keyframes breathe { 0% { transform: scale(0.95); opacity: 0.8; } 100% { transform: scale(1.05); } }
         
-        /* УВЕЛИЧЕННЫЙ ЛОГОТИП */
         .brand-logo {
-            height: 480px; /* Значительно увеличено (было 240px) */
+            height: 480px; /* Увеличено */
             width: auto;
-            max-width: 90%; /* Чтобы лого не вылезало за экран на узких устройствах */
+            max-width: 90%;
             mix-blend-mode: exclusion;
-            margin-top: 3rem; /* Увеличил отступ, чтобы было гармоничнее */
+            margin-top: 3rem;
         }
 
         #roster-section::before {
@@ -147,6 +146,22 @@
         }
         body.light-mode .roster-item { -webkit-text-stroke: 1px #bbb; }
         .roster-item:hover { color: var(--text-color); -webkit-text-stroke: 0px; transform: scale(1.05) skewX(-5deg); text-shadow: 5px 0px 0px var(--accent-color); }
+        
+        /* СТИЛИ ДЛЯ СПИСКА АФФИЛИАТОВ */
+        .affiliate-roster {
+            margin-top: 4rem;
+            max-width: 900px;
+            text-align: center;
+            font-size: 0.9rem;
+            color: var(--text-color-muted);
+            line-height: 1.8;
+            letter-spacing: 0.1rem;
+            text-transform: lowercase;
+        }
+        .affiliate-roster span {
+            margin: 0 0.5em;
+        }
+
         .events-container { width: 100%; max-width: 800px; display: flex; flex-direction: column; gap: 1rem; }
         .event-item {
             display: flex; justify-content: space-between; align-items: center;
@@ -240,19 +255,26 @@
 
     <div class="section" id="roster-section">
         <div class="roster-content-wrapper">
-            <div class="roster-title">СИМБИОНТЫ</div>
+            <!-- ИЗМЕНЕННЫЕ ЗАГОЛОВОК И СПИСОК -->
+            <div class="roster-title">ОСНОВАТЕЛИ</div>
             <ul class="roster-list">
-                <li class="roster-item" data-bg="artist1.gif" data-audio="noise_burst.mp3">ТВОЙ НИКНЕЙМ</li>
-                <li class="roster-item" data-bg="artist2.gif" data-audio="noise_burst.mp3">АРТИСТ 2</li>
-                <li class="roster-item" data-bg="" data-audio="">АРТИСТ 3</li>
+                <li class="roster-item" data-bg="artist1.gif" data-audio="noise_burst.mp3">stereo cross Ⓡ pharmacy gmbh & co. kg</li>
+                <li class="roster-item" data-bg="artist2.gif" data-audio="noise_burst.mp3">.m∞nflower</li>
+                <li class="roster-item" data-bg="" data-audio="">unskyidyदुःख,</li>
+                <li class="roster-item" data-bg="" data-audio="">deadrazy</li>
+                <li class="roster-item" data-bg="" data-audio="">cry 4 me</li>
             </ul>
-            <a href="artists.html" class="btn">ВСЕ АРТИСТЫ</a>
+            <!-- НОВЫЙ БЛОК С АФФИЛИАТАМИ -->
+            <div class="affiliate-roster">
+                dj sosison • mc gribochek • yung traktor • lil podjezd • pixelated tear • glitch baby • voidrunner • datamosh deluxe • serotonin deficit • 404 prophet • sadwave98 • krovat na batareikah • dj shaurma • acid grandpa • beton.fm • cyber-babushka • ghost in the stroyka • deepfake love • user1999 • kernel panic attack • shadow ban • svarka • armatura • x.x.x.tentacion • mc kalbasa • kodein morning • virtualnaya sobaka • proxy tears • plita dreams • garajniy kooperativ • mc kipyatok
+            </div>
         </div>
     </div>
 
     <div id="void-zone">
+        <!-- ИЗМЕНЕННЫЙ ЗАГОЛОВОК -->
         <div class="section" style="min-height: auto; padding-top: 2rem;">
-            <div class="roster-title">МАТЕРИАЛИЗАЦИЯ: РИТУАЛЫ</div>
+            <div class="roster-title">ИВЕНТЫ</div>
             <div class="events-container">
                 <div class="event-item">
                     <span class="event-date">24.11.24</span>
