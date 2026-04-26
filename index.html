@@ -54,6 +54,22 @@
             width: 200px; height: 200px;
         }
 
+        /* --- НОВЫЕ СТИЛИ ДЛЯ PSP-ФОНА --- */
+        #psp-preview-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 1; /* За контентом, но над фоном body */
+            background-size: cover;
+            background-position: center;
+            opacity: 0; /* Скрыт по умолчанию */
+            transition: opacity 0.7s ease-in-out; /* Плавный переход */
+            filter: blur(4px) grayscale(50%); /* Эффект "дальнего" фона */
+            pointer-events: none; /* Не блокирует клики */
+        }
+
         a { text-decoration: none; color: inherit; }
         .navbar {
             position: fixed; top: 0; left: 0; height: 100vh; padding: 0 40px; 
@@ -112,7 +128,7 @@
         @keyframes breathe { 0% { transform: scale(0.95); opacity: 0.8; } 100% { transform: scale(1.05); } }
         
         .brand-logo {
-            height: 480px; /* Увеличено */
+            height: 480px;
             width: auto;
             max-width: 90%;
             mix-blend-mode: exclusion;
@@ -145,18 +161,13 @@
             transition: 0.1s; position: relative; z-index: 20;
         }
         body.light-mode .roster-item { -webkit-text-stroke: 1px #bbb; }
+        /* ЭФФЕКТ ПРИ НАВЕДЕНИИ ОСТАЕТСЯ, НО ГЛОБАЛЬНАЯ ИНВЕРСИЯ УБРАНА ИЗ JS */
         .roster-item:hover { color: var(--text-color); -webkit-text-stroke: 0px; transform: scale(1.05) skewX(-5deg); text-shadow: 5px 0px 0px var(--accent-color); }
         
-        /* СТИЛИ ДЛЯ СПИСКА АФФИЛИАТОВ */
         .affiliate-roster {
-            margin-top: 4rem;
-            max-width: 900px;
-            text-align: center;
-            font-size: 0.9rem;
-            color: var(--text-color-muted);
-            line-height: 1.8;
-            letter-spacing: 0.1rem;
-            text-transform: lowercase;
+            margin-top: 4rem; max-width: 900px; text-align: center;
+            font-size: 0.9rem; color: var(--text-color-muted);
+            line-height: 1.8; letter-spacing: 0.1rem; text-transform: lowercase;
         }
         .affiliate-roster span {
             margin: 0 0.5em;
@@ -221,6 +232,9 @@
     <div id="loader-screen">
         <div id="loader-om-container"></div>
     </div>
+    
+    <!-- НОВЫЙ ЭЛЕМЕНТ ДЛЯ PSP-ФОНА -->
+    <div id="psp-preview-bg"></div>
 
     <audio id="ender-audio" src="ender_ambient.mp3" loop></audio>
 
@@ -255,16 +269,15 @@
 
     <div class="section" id="roster-section">
         <div class="roster-content-wrapper">
-            <!-- ИЗМЕНЕННЫЕ ЗАГОЛОВОК И СПИСОК -->
             <div class="roster-title">ОСНОВАТЕЛИ</div>
             <ul class="roster-list">
-                <li class="roster-item" data-bg="artist1.gif" data-audio="noise_burst.mp3">stereo cross Ⓡ pharmacy gmbh & co. kg</li>
-                <li class="roster-item" data-bg="artist2.gif" data-audio="noise_burst.mp3">.m∞nflower</li>
-                <li class="roster-item" data-bg="" data-audio="">unskyidyदुःख,</li>
-                <li class="roster-item" data-bg="" data-audio="">deadrazy</li>
-                <li class="roster-item" data-bg="" data-audio="">cry 4 me</li>
+                <!-- ДОБАВЛЕНЫ НОВЫЕ DATA-АТРИБУТЫ. ЗАМЕНИТЕ ИМЕНА ФАЙЛОВ НА СВОИ. -->
+                <li class="roster-item" data-psp-bg="bg_stereo_cross.jpg" data-psp-audio="track_stereo_cross.mp3">stereo cross Ⓡ pharmacy gmbh & co. kg</li>
+                <li class="roster-item" data-psp-bg="bg_moonflower.jpg" data-psp-audio="track_moonflower.mp3">.m∞nflower</li>
+                <li class="roster-item" data-psp-bg="bg_unskyidy.jpg" data-psp-audio="track_unskyidy.mp3">unskyidyदुःख,</li>
+                <li class="roster-item" data-psp-bg="bg_deadrazy.jpg" data-psp-audio="track_deadrazy.mp3">deadrazy</li>
+                <li class="roster-item" data-psp-bg="bg_cry4me.jpg" data-psp-audio="track_cry4me.mp3">cry 4 me</li>
             </ul>
-            <!-- НОВЫЙ БЛОК С АФФИЛИАТАМИ -->
             <div class="affiliate-roster">
                 dj sosison • mc gribochek • yung traktor • lil podjezd • pixelated tear • glitch baby • voidrunner • datamosh deluxe • serotonin deficit • 404 prophet • sadwave98 • krovat na batareikah • dj shaurma • acid grandpa • beton.fm • cyber-babushka • ghost in the stroyka • deepfake love • user1999 • kernel panic attack • shadow ban • svarka • armatura • x.x.x.tentacion • mc kalbasa • kodein morning • virtualnaya sobaka • proxy tears • plita dreams • garajniy kooperativ • mc kipyatok
             </div>
@@ -272,7 +285,6 @@
     </div>
 
     <div id="void-zone">
-        <!-- ИЗМЕНЕННЫЙ ЗАГОЛОВОК -->
         <div class="section" style="min-height: auto; padding-top: 2rem;">
             <div class="roster-title">ИВЕНТЫ</div>
             <div class="events-container">
@@ -356,7 +368,6 @@
             const camera = new THREE.OrthographicCamera(frustumSize*aspect/-2,frustumSize*aspect/2,frustumSize/2,frustumSize/-2,0.1,1000);
             camera.position.set(0,0,5);
             camera.lookAt(scene.position);
-            
             let loaderModel;
             const loader = new THREE.OBJLoader();
             loader.load("om.obj",function(object){
@@ -373,9 +384,7 @@
                 requestAnimationFrame(animate);
                 const elapsed = clock.getElapsedTime();
                 chromeMaterial.uniforms.time.value = elapsed;
-                if(loaderModel){
-                    loaderModel.rotation.y += 0.02;
-                }
+                if(loaderModel) loaderModel.rotation.y += 0.02;
                 renderer.render(scene, camera);
             }
             animate();
@@ -408,7 +417,6 @@
             const pointLight2 = new THREE.PointLight(0x00ffff,2,20);
             pointLight2.position.set(-3,-3,3);
             scene.add(pointLight2);
-            
             let omObject = null;
             const loader = new THREE.OBJLoader();
             loader.load("om.obj",
@@ -423,7 +431,6 @@
                     object.scale.setScalar(scale);
                     scene.add(object);
                     omObject = object;
-
                     setTimeout(()=>{
                         const loaderScreen = document.getElementById("loader-screen");
                         if(loaderScreen){
@@ -443,7 +450,6 @@
                     }, 2000);
                 }
             );
-
             window.addEventListener("resize",()=>{
                 const w = container.clientWidth; const h = container.clientHeight;
                 camera.aspect = w/h; camera.updateProjectionMatrix(); renderer.setSize(w,h);
@@ -535,18 +541,31 @@
             requestAnimationFrame(animateFlesh);
         }
         
-        const rosterItems=document.querySelectorAll(".roster-item"),dynamicBg=document.getElementById("dynamic-bg");
-        let hoverAudio=new Audio;
+        const rosterItems=document.querySelectorAll(".roster-item");
+        const pspBgElement = document.getElementById('psp-preview-bg');
+        let pspPreviewAudio = new Audio();
         rosterItems.forEach(item=>{
             item.addEventListener("mouseenter",()=>{
-                const bgPath=item.getAttribute("data-bg");
-                if(bgPath){dynamicBg.style.backgroundImage=`url(${bgPath})`;dynamicBg.style.opacity=1;}
-                const audioPath=item.getAttribute("data-audio");
-                if(audioPath){hoverAudio.src=audioPath;hoverAudio.volume=0.5;hoverAudio.play().catch(e=>{});}
-                document.body.style.filter="invert(1) hue-rotate(180deg)";
+                const bgPath = item.dataset.pspBg;
+                if (bgPath && pspBgElement) {
+                    pspBgElement.style.backgroundImage = `url(${bgPath})`;
+                    pspBgElement.style.opacity = 0.3;
+                }
+                const audioPath = item.dataset.pspAudio;
+                if (audioPath) {
+                    pspPreviewAudio.src = audioPath;
+                    pspPreviewAudio.volume = 0.2;
+                    pspPreviewAudio.loop = true;
+                    pspPreviewAudio.play().catch(e=>{});
+                }
             });
-            item.addEventListener("mouseleave",()=>{dynamicBg.style.opacity=0;hoverAudio.pause();hoverAudio.currentTime=0;document.body.style.filter="none";});
+            item.addEventListener("mouseleave",()=>{
+                if (pspBgElement) pspBgElement.style.opacity = 0;
+                pspPreviewAudio.pause();
+                pspPreviewAudio.currentTime = 0;
+            });
         });
+
         const terminal=document.getElementById("terminal"),termInput=document.getElementById("term-input"),termError=document.getElementById("term-error");
         function openTerminal(){
             terminal.style.display="flex";
